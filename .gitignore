@@ -1,0 +1,31 @@
+# Gradle
+.gradle/
+build/
+!build/libs/*.jar
+!build/libs/
+
+# IDE
+eclipse/
+*.launch
+*.classpath
+*.project
+.settings/
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Java
+*.class
+*.log
+
+# libs (mod jars are not source)
+libs/*.jar
+
+# Gradle wrapper binary
+gradle/wrapper/gradle-wrapper.jar

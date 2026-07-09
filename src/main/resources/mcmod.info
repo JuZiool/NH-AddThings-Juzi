@@ -1,0 +1,16 @@
+[
+{
+  "modid": "nh_addtings_juzi",
+  "name": "NH-AddTings-Juzi",
+  "description": "A mod by juzi.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["juzi"],
+  "credits": "Powered by Minecraft Forge",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
