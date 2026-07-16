@@ -40,7 +40,7 @@
 - Produces: `ModItems.FLIGHT_CHARM_ID`, `ModItems.flightCharm`, and `ModItems.register()`.
 - Produces: `ModRecipes.register()`.
 
-- [ ] **Step 1: Run the existing behavior tests as the green refactor baseline**
+- [x] **Step 1: Run the existing behavior tests as the green refactor baseline**
 
 Run:
 
@@ -50,7 +50,7 @@ Run:
 
 Expected: 4 tests pass before structural changes.
 
-- [ ] **Step 2: Create the item registry**
+- [x] **Step 2: Create the item registry**
 
 Create `ModItems.java`:
 
@@ -77,7 +77,7 @@ public final class ModItems {
 }
 ```
 
-- [ ] **Step 3: Create the recipe dispatcher and update the recipe result**
+- [x] **Step 3: Create the recipe dispatcher and update the recipe result**
 
 Create `ModRecipes.java`:
 
@@ -102,7 +102,7 @@ In `RecipeArcane`, import `ModItems` and replace the string lookup result with:
 ItemStack result = new ItemStack(ModItems.flightCharm, 1);
 ```
 
-- [ ] **Step 4: Compile and run tests**
+- [x] **Step 4: Compile and run tests**
 
 Run:
 
@@ -124,7 +124,7 @@ Expected: compilation succeeds and all 4 tests pass.
 - Consumes: `ModItems.flightCharm`, `ModItems.register()`, and `ModRecipes.register()`.
 - Produces: `ClientEventHandler.register()` and its `TextureStitchEvent.Pre` subscriber.
 
-- [ ] **Step 1: Create the client-only event handler**
+- [x] **Step 1: Create the client-only event handler**
 
 Create `ClientEventHandler.java`:
 
@@ -161,7 +161,7 @@ public final class ClientEventHandler {
 }
 ```
 
-- [ ] **Step 2: Reduce the entry point to coordination**
+- [x] **Step 2: Reduce the entry point to coordination**
 
 Update `NHAddTingsJuzi` so:
 
@@ -172,7 +172,7 @@ Update `NHAddTingsJuzi` so:
 - `init` calls `ModRecipes.register()`.
 - The texture stitch subscriber and its client imports are removed.
 
-- [ ] **Step 3: Compile the lifecycle wiring and run tests**
+- [x] **Step 3: Compile the lifecycle wiring and run tests**
 
 Run:
 
@@ -194,7 +194,7 @@ Expected: all 4 tests pass and common/client classes compile.
 - Consumes: completed modular wiring from Tasks 1-2.
 - Produces: a reobfuscated JAR containing the new modules and no proxy-card resource.
 
-- [ ] **Step 1: Delete the unused texture**
+- [x] **Step 1: Delete the unused texture**
 
 Delete only:
 
@@ -202,7 +202,7 @@ Delete only:
 src/main/resources/assets/nh_addtings_juzi/textures/items/proxy_card.png
 ```
 
-- [ ] **Step 2: Run a clean full build**
+- [x] **Step 2: Run a clean full build**
 
 Run:
 
@@ -212,7 +212,7 @@ Run:
 
 Expected: `BUILD SUCCESSFUL`, 4 tests pass, and ForgeGradle completes `reobf`.
 
-- [ ] **Step 3: Inspect the JAR**
+- [x] **Step 3: Inspect the JAR**
 
 Run:
 
@@ -235,7 +235,7 @@ Expected absent entry:
 assets/nh_addtings_juzi/textures/items/proxy_card.png
 ```
 
-- [ ] **Step 4: Check scope and commit**
+- [x] **Step 4: Check scope and commit**
 
 Run:
 
