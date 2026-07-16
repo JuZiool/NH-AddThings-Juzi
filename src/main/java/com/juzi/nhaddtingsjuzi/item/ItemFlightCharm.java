@@ -25,7 +25,7 @@ public class ItemFlightCharm extends Item implements IBaubleExpanded {
     /** 每 30 秒通过 addExhaustion 消耗的疲劳度（8.0 = 1 个鸡腿） */
     private static final float EXHAUSTION_COST = 8.0F;
 
-    /** 物品图标，由主类 TextureStitchEvent 注册后赋值 */
+    /** 物品图标，由 ClientEventHandler 在 TextureStitchEvent 中赋值 */
     public static IIcon icon;
 
     public ItemFlightCharm() {
