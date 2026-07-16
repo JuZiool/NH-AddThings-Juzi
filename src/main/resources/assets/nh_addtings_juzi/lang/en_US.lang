@@ -12,3 +12,4 @@ nh_addtings_juzi.charging_station.owner=Owner: %s
 nh_addtings_juzi.charging_station.players=Eligible online players: %s
 nh_addtings_juzi.charging_station.targets=Cached GT machines: %s
 nh_addtings_juzi.charging_station.radius=Radius: %s blocks
+nh_addtings_juzi.charging_station.output=Output: %s A (%s EU/t)

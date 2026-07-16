@@ -12,3 +12,4 @@ nh_addtings_juzi.charging_station.owner=所有者：%s
 nh_addtings_juzi.charging_station.players=符合条件的在线玩家：%s
 nh_addtings_juzi.charging_station.targets=已缓存 GT 机器：%s
 nh_addtings_juzi.charging_station.radius=半径：%s 格
+nh_addtings_juzi.charging_station.output=输出：%s A（%s EU/t）

@@ -23,7 +23,14 @@ public final class VajraLogic {
     static boolean isMineableBlock(boolean gregTechMachine,
                                    boolean appropriateTool,
                                    boolean appropriateMaterial) {
-        return gregTechMachine || appropriateTool || appropriateMaterial;
+        return isMineableBlock(gregTechMachine, appropriateTool, appropriateMaterial, false);
+    }
+
+    static boolean isMineableBlock(boolean gregTechMachine,
+                                   boolean appropriateTool,
+                                   boolean appropriateMaterial,
+                                   boolean approvedCommonMaterial) {
+        return gregTechMachine || appropriateTool || appropriateMaterial || approvedCommonMaterial;
     }
 
     static boolean shouldConsumeCableInteraction(boolean cable, boolean clientSide) {

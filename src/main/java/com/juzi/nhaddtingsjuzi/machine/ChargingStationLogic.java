@@ -4,15 +4,24 @@ import java.util.List;
 
 public final class ChargingStationLogic {
 
-    private static final int AMPERAGE = 16;
+    private static final int MAX_AMPERAGE = 16;
+    private static final int CIRCUIT_SLOT_LIMIT = 16;
     private static final int BUFFER_TICKS = 400;
     private static final int DISCOVERY_LIMIT = 128;
     private static final int SERVICE_LIMIT = 16;
 
     private ChargingStationLogic() {}
 
-    public static long tickBudget(ChargingStationTier tier) {
-        return tier == null ? 0L : tier.getVoltage() * AMPERAGE;
+    public static int circuitSlotLimit() {
+        return CIRCUIT_SLOT_LIMIT;
+    }
+
+    public static int effectiveAmperage(int circuitCount) {
+        return Math.max(0, Math.min(circuitCount, MAX_AMPERAGE));
+    }
+
+    public static long tickBudget(ChargingStationTier tier, int circuitCount) {
+        return tier == null ? 0L : tier.getVoltage() * effectiveAmperage(circuitCount);
     }
 
     public static ChargingStationTier tierFromOreNames(List<String> oreNames) {
@@ -25,8 +34,23 @@ public final class ChargingStationLogic {
         return null;
     }
 
-    public static long bufferCapacity(ChargingStationTier tier) {
-        return tickBudget(tier) * BUFFER_TICKS;
+    public static long bufferCapacity(ChargingStationTier tier, int circuitCount) {
+        return tickBudget(tier, circuitCount) * BUFFER_TICKS;
+    }
+
+    public static String compactGuiStatus(String[] lines) {
+        if (lines == null || lines.length < 8) {
+            return "";
+        }
+        StringBuilder text = new StringBuilder(lines[0]);
+        text.append('\n')
+                .append(lines[1]).append("  ")
+                .append(lines[2]).append("  ")
+                .append(lines[7]);
+        for (int index = 3; index < 7; index++) {
+            text.append('\n').append(lines[index]);
+        }
+        return text.toString();
     }
 
     public static long transferVoltage(long stationVoltage, long targetVoltage) {

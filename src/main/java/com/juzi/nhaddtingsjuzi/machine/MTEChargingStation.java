@@ -46,6 +46,7 @@ import net.minecraftforge.oredict.OreDictionary;
 public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
 
     private static final int CIRCUIT_SLOT = 0;
+    private static final int MAX_CIRCUITS = 16;
     private static final Textures.BlockIcons.CustomIcon FRONT_OVERLAY =
             new Textures.BlockIcons.CustomIcon(
                     "nh_addtings_juzi:machine/overlay_charging_station");
@@ -83,6 +84,7 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
             return;
         }
 
+
         ChargingStationTier tier = resolveTier(mInventory[CIRCUIT_SLOT]);
         if (tier != activeTier) {
             activeTier = tier;
@@ -97,7 +99,7 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
         }
         discoverTargets(base);
 
-        long budget = Math.min(base.getStoredEU(), ChargingStationLogic.tickBudget(activeTier));
+        long budget = Math.min(base.getStoredEU(), ChargingStationLogic.tickBudget(activeTier, getCircuitCount()));
         long playerUsed = chargePlayers(budget);
         long remaining = budget - playerUsed;
         long machineUsed = supplyMachines(base, remaining);
@@ -114,12 +116,12 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
 
     @Override
     public long maxAmperesIn() {
-        return activeTier == null ? 0L : 16L;
+        return activeTier == null ? 0L : getCircuitCount();
     }
 
     @Override
     public long maxEUStore() {
-        return ChargingStationLogic.bufferCapacity(activeTier);
+        return ChargingStationLogic.bufferCapacity(activeTier, getCircuitCount());
     }
 
     @Override
@@ -155,6 +157,11 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
         System.arraycopy(casing, 0, front, 0, casing.length);
         front[casing.length] = TextureFactory.of(FRONT_OVERLAY);
         return front;
+    }
+
+    @Override
+    public int func_70297_j_() {
+        return ChargingStationLogic.circuitSlotLimit();
     }
 
     @Override
@@ -236,16 +243,14 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
                 .setSize(18, 18));
     }
 
+    private int getCircuitCount() {
+        ItemStack circuits = mInventory[CIRCUIT_SLOT];
+        return circuits == null ? 0 : ChargingStationLogic.effectiveAmperage(circuits.stackSize);
+    }
+
+
     private String getStatusText() {
-        String[] lines = getInfoData();
-        StringBuilder text = new StringBuilder();
-        for (int index = 0; index < lines.length; index++) {
-            if (index > 0) {
-                text.append('\n');
-            }
-            text.append(lines[index]);
-        }
-        return text.toString();
+        return ChargingStationLogic.compactGuiStatus(getInfoData());
     }
 
     public boolean isGivingInformation() {
@@ -256,6 +261,8 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
         IGregTechTileEntity base = getBaseMetaTileEntity();
         String tierName = activeTier == null ? "-" : activeTier.name();
         int radius = activeTier == null ? 0 : activeTier.getRadius();
+        int amperage = activeTier == null ? 0 : getCircuitCount();
+        long output = ChargingStationLogic.tickBudget(activeTier, amperage);
         return new String[] {
                 StatCollector.translateToLocalFormatted(
                         "nh_addtings_juzi.charging_station.status",
@@ -264,6 +271,9 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
                                 : StatCollector.translateToLocal("nh_addtings_juzi.charging_station.disabled")),
                 StatCollector.translateToLocalFormatted(
                         "nh_addtings_juzi.charging_station.tier", tierName),
+                StatCollector.translateToLocalFormatted(
+                        "nh_addtings_juzi.charging_station.output",
+                        amperage, GTUtility.formatNumbers(output)),
                 StatCollector.translateToLocalFormatted(
                         "nh_addtings_juzi.charging_station.energy",
                         GTUtility.formatNumbers(base == null ? 0L : base.getStoredEU()),
@@ -424,7 +434,7 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
             long voltage = ChargingStationLogic.transferVoltage(
                     activeTier.getVoltage(), targetVoltage);
             long availableAmperes = voltage <= 0L ? 0L : (budget - used) / voltage;
-            long amperes = Math.min(16L, availableAmperes);
+            long amperes = Math.min(getCircuitCount(), availableAmperes);
             if (amperes > 0L) {
                 long accepted = injectFromAnySide(target, voltage, amperes);
                 used += accepted * voltage;

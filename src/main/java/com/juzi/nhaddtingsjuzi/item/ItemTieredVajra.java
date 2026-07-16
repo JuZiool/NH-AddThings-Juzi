@@ -134,7 +134,24 @@ public class ItemTieredVajra extends Item implements IElectricItem {
                         Material.plants,
                         Material.vine,
                         Material.leaves,
-                        Material.gourd));
+                        Material.gourd),
+                GTToolHarvestHelper.isAppropriateMaterial(
+                        block,
+                        Material.cactus,
+                        Material.glass,
+                        Material.sponge,
+                        Material.cloth,
+                        Material.carpet,
+                        Material.coral,
+                        Material.ice,
+                        Material.packedIce,
+                        Material.circuits,
+                        Material.redstoneLight,
+                        Material.tnt,
+                        Material.cake,
+                        Material.web,
+                        Material.piston,
+                        Material.dragonEgg));
     }
 
     @Override

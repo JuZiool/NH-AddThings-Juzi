@@ -44,6 +44,13 @@ public class VajraLogicTest {
     }
 
     @Test
+    public void minesExplicitlyApprovedCommonMaterials() {
+        assertFalse(VajraLogic.isMineableBlock(false, false, false, false));
+        assertTrue(VajraLogic.isMineableBlock(false, false, false, true));
+        assertTrue(VajraLogic.isMineableBlock(true, false, false, false));
+    }
+
+    @Test
     public void onlyConsumesCableInteractionOnTheServer() {
         assertFalse(VajraLogic.shouldConsumeCableInteraction(false, false));
         assertFalse(VajraLogic.shouldConsumeCableInteraction(true, true));

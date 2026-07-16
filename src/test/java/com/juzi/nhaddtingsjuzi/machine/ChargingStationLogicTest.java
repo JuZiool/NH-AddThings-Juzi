@@ -49,11 +49,39 @@ public class ChargingStationLogicTest {
     }
 
     @Test
-    public void calculatesSixteenAmpBudgetAndTwentySecondBuffer() {
-        assertEquals(8192L, ChargingStationLogic.tickBudget(ChargingStationTier.HV));
-        assertEquals(3276800L, ChargingStationLogic.bufferCapacity(ChargingStationTier.HV));
-        assertEquals(0L, ChargingStationLogic.tickBudget(null));
-        assertEquals(0L, ChargingStationLogic.bufferCapacity(null));
+    public void scalesBudgetAndBufferWithCircuitCount() {
+        assertEquals(16, ChargingStationLogic.circuitSlotLimit());
+        assertEquals(0, ChargingStationLogic.effectiveAmperage(0));
+        assertEquals(1, ChargingStationLogic.effectiveAmperage(1));
+        assertEquals(8, ChargingStationLogic.effectiveAmperage(8));
+        assertEquals(16, ChargingStationLogic.effectiveAmperage(16));
+        assertEquals(16, ChargingStationLogic.effectiveAmperage(64));
+
+        assertEquals(0L, ChargingStationLogic.tickBudget(ChargingStationTier.HV, 0));
+        assertEquals(512L, ChargingStationLogic.tickBudget(ChargingStationTier.HV, 1));
+        assertEquals(4096L, ChargingStationLogic.tickBudget(ChargingStationTier.HV, 8));
+        assertEquals(8192L, ChargingStationLogic.tickBudget(ChargingStationTier.HV, 16));
+        assertEquals(8192L, ChargingStationLogic.tickBudget(ChargingStationTier.HV, 64));
+        assertEquals(204800L, ChargingStationLogic.bufferCapacity(ChargingStationTier.HV, 1));
+        assertEquals(3276800L, ChargingStationLogic.bufferCapacity(ChargingStationTier.HV, 16));
+        assertEquals(0L, ChargingStationLogic.tickBudget(null, 16));
+        assertEquals(0L, ChargingStationLogic.bufferCapacity(null, 16));
+    }
+
+    @Test
+    public void compactsStatusTierOutputAndRadiusForGui() {
+        assertEquals(
+                "状态：已启用\n等级：HV  输出：8 A（4,096 EU/t）  半径：64 格\n储存 EU：100 / 200\n所有者：JuZiool\n符合条件的在线玩家：1\n已缓存 GT 机器：2",
+                ChargingStationLogic.compactGuiStatus(new String[] {
+                        "状态：已启用",
+                        "等级：HV",
+                        "输出：8 A（4,096 EU/t）",
+                        "储存 EU：100 / 200",
+                        "所有者：JuZiool",
+                        "符合条件的在线玩家：1",
+                        "已缓存 GT 机器：2",
+                        "半径：64 格"
+                }));
     }
 
     @Test
