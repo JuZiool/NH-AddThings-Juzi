@@ -1,5 +1,7 @@
 package com.juzi.nhaddtingsjuzi.recipe;
 
+import com.juzi.nhaddtingsjuzi.registry.ModItems;
+
 import net.minecraft.item.ItemStack;
 import thaumcraft.api.ThaumcraftApi;
 import thaumcraft.api.aspects.Aspect;
@@ -37,8 +39,7 @@ public class RecipeArcane {
         ItemStack eldritchEye = new ItemStack(GameRegistry.findItem("Thaumcraft", "ItemEldritchObject"), 1, 0);
 
         // 飞行符咒
-        ItemStack result = new ItemStack(
-                GameRegistry.findItem("nh_addtings_juzi", "flight_charm"), 1);
+        ItemStack result = new ItemStack(ModItems.flightCharm, 1);
 
         // 注册奥术合成配方
         ThaumcraftApi.addArcaneCraftingRecipe(
