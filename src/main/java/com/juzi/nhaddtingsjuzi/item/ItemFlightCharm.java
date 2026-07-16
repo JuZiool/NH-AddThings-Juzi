@@ -22,8 +22,6 @@ public class ItemFlightCharm extends Item implements IBaubleExpanded {
     private static final int MIN_FOOD_LEVEL = 4;
 
     private static final String TAG_FLY_TIMER = "flyTimer";
-    private static final String TAG_OWNS_FLIGHT = "ownsFlightPermission";
-    private static final String TAG_FLIGHT_OWNER_UUID = "flightOwnerUuid";
     /** 每 30 秒通过 addExhaustion 消耗的疲劳度（8.0 = 1 个鸡腿） */
     private static final float EXHAUSTION_COST = 8.0F;
 
@@ -68,20 +66,20 @@ public class ItemFlightCharm extends Item implements IBaubleExpanded {
         if (player.worldObj.isRemote || !(player instanceof EntityPlayer)) return;
 
         EntityPlayer ep = (EntityPlayer) player;
-        updateFlightPermission(stack, ep);
+        updateFlightPermission(ep);
         tickFlightConsumption(stack, ep);
     }
 
     @Override
     public void onEquipped(ItemStack stack, EntityLivingBase player) {
         if (player.worldObj.isRemote || !(player instanceof EntityPlayer)) return;
-        updateFlightPermission(stack, (EntityPlayer) player);
+        updateFlightPermission((EntityPlayer) player);
     }
 
     @Override
     public void onUnequipped(ItemStack stack, EntityLivingBase player) {
         if (player.worldObj.isRemote || !(player instanceof EntityPlayer)) return;
-        releaseOwnedFlight(stack, (EntityPlayer) player);
+        disableFlight((EntityPlayer) player);
     }
 
     @Override
@@ -97,7 +95,7 @@ public class ItemFlightCharm extends Item implements IBaubleExpanded {
     @Override
     public void onPlayerLoad(ItemStack stack, EntityLivingBase player) {
         if (player.worldObj.isRemote || !(player instanceof EntityPlayer)) return;
-        updateFlightPermission(stack, (EntityPlayer) player);
+        updateFlightPermission((EntityPlayer) player);
     }
 
     // ========== Tooltip ==========
@@ -116,65 +114,41 @@ public class ItemFlightCharm extends Item implements IBaubleExpanded {
 
     // ========== 内部逻辑 ==========
 
-    private void updateFlightPermission(ItemStack stack, EntityPlayer ep) {
-        NBTTagCompound tag = getOrCreateTag(stack);
-        String playerUuid = ep.getUniqueID().toString();
-        resetTransferredOwnership(tag, playerUuid);
-
-        boolean ownsFlight = tag.getBoolean(TAG_OWNS_FLIGHT);
-        boolean ownerMatches = playerUuid.equals(tag.getString(TAG_FLIGHT_OWNER_UUID));
+    private void updateFlightPermission(EntityPlayer ep) {
         boolean creative = ep.capabilities.isCreativeMode;
         boolean hasEnoughFood = ep.getFoodStats().getFoodLevel() >= MIN_FOOD_LEVEL;
 
-        if (creative) {
-            tag.setBoolean(TAG_OWNS_FLIGHT, false);
-            return;
-        }
+        if (creative) return;
 
         if (!hasEnoughFood) {
-            releaseOwnedFlight(stack, ep);
+            disableFlight(ep);
             return;
         }
 
-        if (FlightCharmLogic.shouldClaimFlight(
-                ownsFlight, ep.capabilities.allowFlying, false, true)) {
-            tag.setBoolean(TAG_OWNS_FLIGHT, true);
-            ep.capabilities.allowFlying = true;
-            ep.sendPlayerAbilities();
-        } else if (FlightCharmLogic.shouldRestoreOwnedFlight(
-                ownsFlight, ownerMatches, ep.capabilities.allowFlying, false, true)) {
+        if (FlightCharmLogic.shouldEnableFlight(
+                ep.capabilities.allowFlying, creative, hasEnoughFood)) {
             ep.capabilities.allowFlying = true;
             ep.sendPlayerAbilities();
         }
     }
 
-    private void releaseOwnedFlight(ItemStack stack, EntityPlayer ep) {
-        NBTTagCompound tag = getOrCreateTag(stack);
-        String playerUuid = ep.getUniqueID().toString();
-        resetTransferredOwnership(tag, playerUuid);
-
-        boolean ownsFlight = tag.getBoolean(TAG_OWNS_FLIGHT);
-        boolean ownerMatches = playerUuid.equals(tag.getString(TAG_FLIGHT_OWNER_UUID));
-
-        if (FlightCharmLogic.shouldReleaseOwnedFlight(
-                ownsFlight, ownerMatches, ep.capabilities.isCreativeMode)) {
+    private void disableFlight(EntityPlayer ep) {
+        if (FlightCharmLogic.shouldDisableFlight(
+                ep.capabilities.allowFlying, ep.capabilities.isFlying,
+                ep.capabilities.isCreativeMode)) {
             ep.capabilities.allowFlying = false;
             ep.capabilities.isFlying = false;
             ep.sendPlayerAbilities();
         }
-        tag.setBoolean(TAG_OWNS_FLIGHT, false);
     }
 
     private void tickFlightConsumption(ItemStack stack, EntityPlayer ep) {
         NBTTagCompound tag = getOrCreateTag(stack);
-        boolean ownsFlight = tag.getBoolean(TAG_OWNS_FLIGHT);
-        boolean ownerMatches = ep.getUniqueID().toString()
-                .equals(tag.getString(TAG_FLIGHT_OWNER_UUID));
         boolean hasEnoughFood = ep.getFoodStats().getFoodLevel() >= MIN_FOOD_LEVEL;
 
         if (!FlightCharmLogic.shouldCountFlight(
-                ownsFlight, ownerMatches, ep.capabilities.isFlying,
-                ep.capabilities.isCreativeMode, hasEnoughFood)) {
+                ep.capabilities.isFlying, ep.capabilities.isCreativeMode,
+                hasEnoughFood)) {
             return;
         }
 
@@ -184,17 +158,6 @@ public class ItemFlightCharm extends Item implements IBaubleExpanded {
         }
         tag.setInteger(TAG_FLY_TIMER,
                 FlightCharmLogic.nextTimer(timer, FOOD_COST_INTERVAL));
-    }
-
-    private void resetTransferredOwnership(NBTTagCompound tag, String playerUuid) {
-        if (!FlightCharmLogic.shouldResetFlightOwner(
-                tag.getString(TAG_FLIGHT_OWNER_UUID), playerUuid)) {
-            return;
-        }
-
-        tag.setBoolean(TAG_OWNS_FLIGHT, false);
-        tag.setInteger(TAG_FLY_TIMER, 0);
-        tag.setString(TAG_FLIGHT_OWNER_UUID, playerUuid);
     }
 
     private NBTTagCompound getOrCreateTag(ItemStack stack) {

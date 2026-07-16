@@ -4,31 +4,19 @@ final class FlightCharmLogic {
 
     private FlightCharmLogic() {}
 
-    static boolean shouldClaimFlight(boolean ownsFlight, boolean allowFlying,
-                                     boolean creative, boolean hasEnoughFood) {
-        return !ownsFlight && !allowFlying && !creative && hasEnoughFood;
+    static boolean shouldEnableFlight(boolean allowFlying, boolean creative,
+                                      boolean hasEnoughFood) {
+        return !allowFlying && !creative && hasEnoughFood;
     }
 
-    static boolean shouldResetFlightOwner(String storedOwnerUuid, String currentPlayerUuid) {
-        return storedOwnerUuid == null || currentPlayerUuid == null
-                || !storedOwnerUuid.equals(currentPlayerUuid);
+    static boolean shouldDisableFlight(boolean allowFlying, boolean isFlying,
+                                       boolean creative) {
+        return (allowFlying || isFlying) && !creative;
     }
 
-    static boolean shouldRestoreOwnedFlight(boolean ownsFlight, boolean ownerMatches,
-                                            boolean allowFlying, boolean creative,
-                                            boolean hasEnoughFood) {
-        return ownsFlight && ownerMatches && !allowFlying && !creative && hasEnoughFood;
-    }
-
-    static boolean shouldReleaseOwnedFlight(boolean ownsFlight, boolean ownerMatches,
-                                            boolean creative) {
-        return ownsFlight && ownerMatches && !creative;
-    }
-
-    static boolean shouldCountFlight(boolean ownsFlight, boolean ownerMatches,
-                                     boolean isFlying, boolean creative,
+    static boolean shouldCountFlight(boolean isFlying, boolean creative,
                                      boolean hasEnoughFood) {
-        return ownsFlight && ownerMatches && isFlying && !creative && hasEnoughFood;
+        return isFlying && !creative && hasEnoughFood;
     }
 
     static boolean shouldChargeOnNextTick(int timer, int interval) {

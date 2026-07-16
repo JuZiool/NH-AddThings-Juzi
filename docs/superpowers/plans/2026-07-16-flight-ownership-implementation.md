@@ -1,5 +1,7 @@
 # Flight Ownership and Consumption Implementation Plan
 
+> **Superseded behavior note (2026-07-16):** The user later chose direct survival-flight control instead of cross-mod ownership tracking. The final implementation no longer stores an ownership flag or player UUID. Equipping with enough food enables flight; unequipping or insufficient food disables survival flight unconditionally; creative flight remains untouched; consumption still counts only actual flying ticks. This document is retained as implementation history.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Make the Flight Charm revoke only flight that it granted and consume hunger after each 600 ticks of actual, owned flight.
