@@ -17,7 +17,7 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "0.1.0b"
+version = "0.1.1b"
 group= "com.juzi" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "NH-AddTings-Juzi"
 
