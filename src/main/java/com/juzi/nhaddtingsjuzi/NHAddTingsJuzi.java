@@ -18,7 +18,7 @@ public class NHAddTingsJuzi
 {
     public static final String MODID = "nh_addtings_juzi";
     public static final String NAME = "NH-AddTings-Juzi";
-    public static final String VERSION = "0.0.9b";
+    public static final String VERSION = "0.1.0b";
 
     /** 飞行符咒物品实例 */
     public static Item flightCharm;
