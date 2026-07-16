@@ -1,2 +1,6 @@
 item.flight_charm.name=飞行符咒
+item.hv_vajra.name=基础金刚杵
+item.hv_vajra.tooltip=镐、锹、斧、扳手与剪线钳五合一
+item.hv_vajra.silk.enabled=精准采集已启用
+item.hv_vajra.silk.disabled=精准采集已禁用
 itemGroup.nh_addtings_juzi=NH-AddTings-Juzi

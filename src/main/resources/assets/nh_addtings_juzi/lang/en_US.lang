@@ -1,2 +1,6 @@
 item.flight_charm.name=Flight Charm
+item.hv_vajra.name=Basic Vajra
+item.hv_vajra.tooltip=Pickaxe, shovel, axe, wrench, and wire cutter in one
+item.hv_vajra.silk.enabled=Silk Touch enabled
+item.hv_vajra.silk.disabled=Silk Touch disabled
 itemGroup.nh_addtings_juzi=NH-AddTings-Juzi

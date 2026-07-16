@@ -2,6 +2,7 @@ package com.juzi.nhaddtingsjuzi.client;
 
 import com.juzi.nhaddtingsjuzi.NHAddTingsJuzi;
 import com.juzi.nhaddtingsjuzi.item.ItemFlightCharm;
+import com.juzi.nhaddtingsjuzi.item.ItemTieredVajra;
 import com.juzi.nhaddtingsjuzi.registry.ModItems;
 
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -25,6 +26,8 @@ public final class ClientEventHandler {
         if (event.map.getTextureType() == 1) {
             ItemFlightCharm.icon = event.map.registerIcon(
                     NHAddTingsJuzi.MODID + ":" + ModItems.FLIGHT_CHARM_ID);
+            ItemTieredVajra.icon = event.map.registerIcon(
+                    NHAddTingsJuzi.MODID + ":" + ModItems.HV_VAJRA_ID);
         }
     }
 }
