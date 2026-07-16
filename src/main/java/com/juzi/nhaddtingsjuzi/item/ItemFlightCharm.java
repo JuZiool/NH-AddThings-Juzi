@@ -150,9 +150,11 @@ public class ItemFlightCharm extends Item implements IBaubleExpanded {
 
     private void releaseOwnedFlight(ItemStack stack, EntityPlayer ep) {
         NBTTagCompound tag = getOrCreateTag(stack);
+        String playerUuid = ep.getUniqueID().toString();
+        resetTransferredOwnership(tag, playerUuid);
+
         boolean ownsFlight = tag.getBoolean(TAG_OWNS_FLIGHT);
-        boolean ownerMatches = ep.getUniqueID().toString()
-                .equals(tag.getString(TAG_FLIGHT_OWNER_UUID));
+        boolean ownerMatches = playerUuid.equals(tag.getString(TAG_FLIGHT_OWNER_UUID));
 
         if (FlightCharmLogic.shouldReleaseOwnedFlight(
                 ownsFlight, ownerMatches, ep.capabilities.isCreativeMode)) {
