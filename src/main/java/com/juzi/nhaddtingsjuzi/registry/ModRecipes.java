@@ -1,6 +1,7 @@
 package com.juzi.nhaddtingsjuzi.registry;
 
 import com.juzi.nhaddtingsjuzi.recipe.RecipeArcane;
+import com.juzi.nhaddtingsjuzi.recipe.RecipeVajra;
 
 public final class ModRecipes {
 
@@ -8,5 +9,6 @@ public final class ModRecipes {
 
     public static void register() {
         RecipeArcane.register();
+        RecipeVajra.register();
     }
 }
