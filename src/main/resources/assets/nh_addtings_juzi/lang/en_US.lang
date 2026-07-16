@@ -1,6 +1,14 @@
 item.flight_charm.name=Flight Charm
 item.hv_vajra.name=Basic Vajra
 item.hv_vajra.tooltip=Pickaxe, shovel, axe, wrench, and wire cutter in one
-item.hv_vajra.silk.enabled=Silk Touch enabled
-item.hv_vajra.silk.disabled=Silk Touch disabled
 itemGroup.nh_addtings_juzi=NH-AddTings-Juzi
+gt.blockmachines.charging_station.name=Charging Station
+nh_addtings_juzi.charging_station.status=Status: %s
+nh_addtings_juzi.charging_station.enabled=Enabled
+nh_addtings_juzi.charging_station.disabled=Disabled
+nh_addtings_juzi.charging_station.tier=Tier: %s
+nh_addtings_juzi.charging_station.energy=Stored EU: %s / %s
+nh_addtings_juzi.charging_station.owner=Owner: %s
+nh_addtings_juzi.charging_station.players=Eligible online players: %s
+nh_addtings_juzi.charging_station.targets=Cached GT machines: %s
+nh_addtings_juzi.charging_station.radius=Radius: %s blocks

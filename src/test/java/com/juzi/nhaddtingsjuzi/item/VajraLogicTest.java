@@ -34,4 +34,32 @@ public class VajraLogicTest {
         assertEquals(7500000.0D, VajraLogic.transferredCharge(7500000.0D, VajraTier.HV), 0.0D);
         assertEquals(10000000.0D, VajraLogic.transferredCharge(12000000.0D, VajraTier.HV), 0.0D);
     }
+
+    @Test
+    public void minesGregTechMachinesEvenWithTheirCustomMaterial() {
+        assertFalse(VajraLogic.isMineableBlock(false, false, false));
+        assertTrue(VajraLogic.isMineableBlock(true, false, false));
+        assertTrue(VajraLogic.isMineableBlock(false, true, false));
+        assertTrue(VajraLogic.isMineableBlock(false, false, true));
+    }
+
+    @Test
+    public void onlyConsumesCableInteractionOnTheServer() {
+        assertFalse(VajraLogic.shouldConsumeCableInteraction(false, false));
+        assertFalse(VajraLogic.shouldConsumeCableInteraction(true, true));
+        assertTrue(VajraLogic.shouldConsumeCableInteraction(true, false));
+    }
+
+    @Test
+    public void bypassesSneakUseForGregTechPipes() {
+        assertFalse(VajraLogic.shouldBypassSneakUse(false));
+        assertTrue(VajraLogic.shouldBypassSneakUse(true));
+    }
+
+    @Test
+    public void onlySuppressesGregTechToolMessagesFromTheVajra() {
+        assertFalse(VajraLogic.shouldSuppressToolMessage(false, true));
+        assertFalse(VajraLogic.shouldSuppressToolMessage(true, false));
+        assertTrue(VajraLogic.shouldSuppressToolMessage(true, true));
+    }
 }

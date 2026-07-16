@@ -8,15 +8,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
@@ -24,7 +20,10 @@ import net.minecraft.world.World;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import gregtech.api.GregTechAPI;
 import gregtech.api.util.GTToolHarvestHelper;
+import gregtech.api.util.GTUtility;
+import net.minecraftforge.common.util.ForgeDirection;
 
 public class ItemTieredVajra extends Item implements IElectricItem {
 
@@ -116,9 +115,11 @@ public class ItemTieredVajra extends Item implements IElectricItem {
     }
 
     private boolean isMineableBlock(Block block, int metadata) {
-        return GTToolHarvestHelper.isAppropriateTool(
-                block, metadata, "pickaxe", "shovel", "axe")
-                || GTToolHarvestHelper.isAppropriateMaterial(
+        return VajraLogic.isMineableBlock(
+                GregTechAPI.isMachineBlock(block, metadata),
+                GTToolHarvestHelper.isAppropriateTool(
+                        block, metadata, "pickaxe", "shovel", "axe"),
+                GTToolHarvestHelper.isAppropriateMaterial(
                         block,
                         Material.rock,
                         Material.iron,
@@ -133,7 +134,7 @@ public class ItemTieredVajra extends Item implements IElectricItem {
                         Material.plants,
                         Material.vine,
                         Material.leaves,
-                        Material.gourd);
+                        Material.gourd));
     }
 
     @Override
@@ -148,40 +149,97 @@ public class ItemTieredVajra extends Item implements IElectricItem {
     }
 
     @Override
-    public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-        if (!player.isSneaking()) {
-            return stack;
+    public boolean onItemUseFirst(ItemStack stack, EntityPlayer player, World world,
+                                  int x, int y, int z, int side,
+                                  float hitX, float hitY, float hitZ) {
+        TileEntity tileEntity = world.getTileEntity(x, y, z);
+        Object cable = getGregTechCable(tileEntity);
+        if (cable == null) {
+            return false;
         }
 
-        if (!world.isRemote) {
-            boolean enabled = EnchantmentHelper.getEnchantmentLevel(
-                    Enchantment.silkTouch.effectId, stack) > 0;
-            if (enabled) {
-                removeSilkTouch(stack);
-            } else {
-                stack.addEnchantment(Enchantment.silkTouch, 1);
-            }
-            player.addChatMessage(new ChatComponentTranslation(
-                    enabled ? "item.hv_vajra.silk.disabled" : "item.hv_vajra.silk.enabled"));
+        if (!VajraLogic.shouldConsumeCableInteraction(true, world.isRemote)) {
+            return false;
         }
-        return stack;
+
+        ForgeDirection clickedSide = ForgeDirection.getOrientation(side);
+        ForgeDirection connectionSide = GTUtility.determineWrenchingSide(
+                clickedSide, hitX, hitY, hitZ);
+        return useWireCutter(cable, clickedSide, connectionSide,
+                player, hitX, hitY, hitZ, stack);
     }
 
-    private void removeSilkTouch(ItemStack stack) {
-        NBTTagCompound tag = stack.getTagCompound();
-        if (tag == null || !tag.hasKey("ench", 9)) {
-            return;
+    @Override
+    public boolean doesSneakBypassUse(World world, int x, int y, int z,
+                                      EntityPlayer player) {
+        return VajraLogic.shouldBypassSneakUse(
+                isGregTechPipe(world.getTileEntity(x, y, z)));
+    }
+
+    private boolean isGregTechPipe(TileEntity tileEntity) {
+        if (tileEntity == null) {
+            return false;
         }
 
-        NBTTagList enchantments = tag.getTagList("ench", 10);
-        for (int i = enchantments.tagCount() - 1; i >= 0; i--) {
-            if (enchantments.getCompoundTagAt(i).getShort("id")
-                    == Enchantment.silkTouch.effectId) {
-                enchantments.removeTag(i);
-            }
+        try {
+            return Class.forName("gregtech.api.metatileentity.BaseMetaPipeEntity")
+                    .isInstance(tileEntity);
+        } catch (ClassNotFoundException ignored) {
+            return false;
         }
-        if (enchantments.tagCount() == 0) {
-            tag.removeTag("ench");
+    }
+
+    private Object getGregTechCable(TileEntity tileEntity) {
+        if (tileEntity == null) {
+            return null;
+        }
+
+        try {
+            Class<?> pipeClass = Class.forName(
+                    "gregtech.api.metatileentity.BaseMetaPipeEntity");
+            if (!pipeClass.isInstance(tileEntity)) {
+                return null;
+            }
+            Object metaTileEntity = pipeClass.getMethod("getMetaTileEntity")
+                    .invoke(tileEntity);
+            Class<?> cableClass = Class.forName(
+                    "gregtech.api.interfaces.metatileentity.IMetaTileEntityCable");
+            return cableClass.isInstance(metaTileEntity) ? metaTileEntity : null;
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private boolean useWireCutter(Object cable,
+                                  ForgeDirection clickedSide,
+                                  ForgeDirection connectionSide,
+                                  EntityPlayer player,
+                                  float hitX, float hitY, float hitZ,
+                                  ItemStack stack) {
+        try {
+            boolean handled = (Boolean) cable.getClass().getMethod(
+                    "onWireCutterRightClick",
+                    ForgeDirection.class,
+                    ForgeDirection.class,
+                    EntityPlayer.class,
+                    Float.TYPE,
+                    Float.TYPE,
+                    Float.TYPE,
+                    ItemStack.class).invoke(
+                            cable,
+                            clickedSide,
+                            connectionSide,
+                            player,
+                            hitX,
+                            hitY,
+                            hitZ,
+                            stack);
+            if (handled) {
+                cable.getClass().getMethod("func_70296_d").invoke(cable);
+            }
+            return handled;
+        } catch (Exception ignored) {
+            return false;
         }
     }
 
@@ -230,7 +288,6 @@ public class ItemTieredVajra extends Item implements IElectricItem {
                                List list, boolean advanced) {
         list.add(EnumChatFormatting.GRAY
                 + StatCollector.translateToLocal("item.hv_vajra.tooltip"));
-        list.add(EnumChatFormatting.AQUA + ElectricItem.manager.getToolTip(stack));
     }
 
     @Override

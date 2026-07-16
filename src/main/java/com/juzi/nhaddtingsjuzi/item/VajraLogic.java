@@ -1,6 +1,6 @@
 package com.juzi.nhaddtingsjuzi.item;
 
-final class VajraLogic {
+public final class VajraLogic {
 
     private VajraLogic() {}
 
@@ -18,5 +18,24 @@ final class VajraLogic {
 
     static double transferredCharge(double charge, VajraTier tier) {
         return Math.max(0.0D, Math.min(charge, tier.getMaxCharge()));
+    }
+
+    static boolean isMineableBlock(boolean gregTechMachine,
+                                   boolean appropriateTool,
+                                   boolean appropriateMaterial) {
+        return gregTechMachine || appropriateTool || appropriateMaterial;
+    }
+
+    static boolean shouldConsumeCableInteraction(boolean cable, boolean clientSide) {
+        return cable && !clientSide;
+    }
+
+    static boolean shouldBypassSneakUse(boolean gregTechPipe) {
+        return gregTechPipe;
+    }
+
+    public static boolean shouldSuppressToolMessage(boolean holdingVajra,
+                                                    boolean gregTechToolMessage) {
+        return holdingVajra && gregTechToolMessage;
     }
 }

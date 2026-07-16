@@ -9,6 +9,10 @@ buildscript {
             name = "sonatype"
             url = "https://oss.sonatype.org/content/repositories/snapshots/"
         }
+        maven {
+            name = "gtnh"
+            url = "https://nexus.gtnewhorizons.com/repository/public/"
+        }
     }
     dependencies {
         classpath 'com.anatawa12.forge:ForgeGradle:1.2-1.1.1'
@@ -17,7 +21,14 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "0.1.1b"
+repositories {
+    maven {
+        name = "gtnh"
+        url = "https://nexus.gtnewhorizons.com/repository/public/"
+    }
+}
+
+version = "0.1.2b"
 group= "com.juzi" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "NH-AddTings-Juzi"
 
@@ -32,6 +43,7 @@ compileTestJava.options.encoding = 'UTF-8'
 
 dependencies {
     testCompile 'junit:junit:4.13.2'
+    compile 'com.github.GTNewHorizons:ModularUI:1.2.20'
 
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..
