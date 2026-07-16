@@ -22,6 +22,7 @@ public class ItemFlightCharm extends Item implements IBaubleExpanded {
     private static final int MIN_FOOD_LEVEL = 4;
 
     private static final String TAG_FLY_TIMER = "flyTimer";
+    private static final String TAG_OWNS_FLIGHT = "ownsFlightPermission";
     /** 每 30 秒通过 addExhaustion 消耗的疲劳度（8.0 = 1 个鸡腿） */
     private static final float EXHAUSTION_COST = 8.0F;
 
@@ -63,48 +64,23 @@ public class ItemFlightCharm extends Item implements IBaubleExpanded {
 
     @Override
     public void onWornTick(ItemStack stack, EntityLivingBase player) {
-        if (player.worldObj.isRemote) return;
-        if (!(player instanceof EntityPlayer)) return;
+        if (player.worldObj.isRemote || !(player instanceof EntityPlayer)) return;
 
         EntityPlayer ep = (EntityPlayer) player;
-        int foodLevel = ep.getFoodStats().getFoodLevel();
-
-        if (foodLevel >= MIN_FOOD_LEVEL) {
-            if (!ep.capabilities.allowFlying) {
-                ep.capabilities.allowFlying = true;
-                ep.sendPlayerAbilities();
-            }
-            tickFoodConsumption(stack, ep);
-        } else {
-            if (ep.capabilities.allowFlying) {
-                ep.capabilities.allowFlying = false;
-                ep.capabilities.isFlying = false;
-                ep.sendPlayerAbilities();
-            }
-        }
+        updateFlightPermission(stack, ep);
+        tickFlightConsumption(stack, ep);
     }
 
     @Override
     public void onEquipped(ItemStack stack, EntityLivingBase player) {
-        if (player.worldObj.isRemote) return;
-        if (!(player instanceof EntityPlayer)) return;
-
-        EntityPlayer ep = (EntityPlayer) player;
-        if (ep.getFoodStats().getFoodLevel() >= MIN_FOOD_LEVEL) {
-            ep.capabilities.allowFlying = true;
-            ep.sendPlayerAbilities();
-        }
+        if (player.worldObj.isRemote || !(player instanceof EntityPlayer)) return;
+        updateFlightPermission(stack, (EntityPlayer) player);
     }
 
     @Override
     public void onUnequipped(ItemStack stack, EntityLivingBase player) {
-        if (player.worldObj.isRemote) return;
-        if (!(player instanceof EntityPlayer)) return;
-
-        EntityPlayer ep = (EntityPlayer) player;
-        ep.capabilities.allowFlying = false;
-        ep.capabilities.isFlying = false;
-        ep.sendPlayerAbilities();
+        if (player.worldObj.isRemote || !(player instanceof EntityPlayer)) return;
+        releaseOwnedFlight(stack, (EntityPlayer) player);
     }
 
     @Override
@@ -119,7 +95,8 @@ public class ItemFlightCharm extends Item implements IBaubleExpanded {
 
     @Override
     public void onPlayerLoad(ItemStack stack, EntityLivingBase player) {
-        // no-op
+        if (player.worldObj.isRemote || !(player instanceof EntityPlayer)) return;
+        updateFlightPermission(stack, (EntityPlayer) player);
     }
 
     // ========== Tooltip ==========
@@ -130,7 +107,7 @@ public class ItemFlightCharm extends Item implements IBaubleExpanded {
                                List list, boolean advanced) {
         if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) {
             list.add(EnumChatFormatting.GRAY + "佩戴后获得创造飞行能力");
-            list.add(EnumChatFormatting.GRAY + "每 30 秒消耗 1 格饱食度");
+            list.add(EnumChatFormatting.GRAY + "每累计飞行 30 秒消耗 1 格饱食度");
         } else {
             list.add(EnumChatFormatting.GRAY + "按住 Shift 查看详情");
         }
@@ -138,20 +115,70 @@ public class ItemFlightCharm extends Item implements IBaubleExpanded {
 
     // ========== 内部逻辑 ==========
 
-    private void tickFoodConsumption(ItemStack stack, EntityPlayer ep) {
+    private void updateFlightPermission(ItemStack stack, EntityPlayer ep) {
+        NBTTagCompound tag = getOrCreateTag(stack);
+        boolean ownsFlight = tag.getBoolean(TAG_OWNS_FLIGHT);
+        boolean creative = ep.capabilities.isCreativeMode;
+        boolean hasEnoughFood = ep.getFoodStats().getFoodLevel() >= MIN_FOOD_LEVEL;
+
+        if (creative) {
+            tag.setBoolean(TAG_OWNS_FLIGHT, false);
+            return;
+        }
+
+        if (!hasEnoughFood) {
+            releaseOwnedFlight(stack, ep);
+            return;
+        }
+
+        if (FlightCharmLogic.shouldClaimFlight(
+                ownsFlight, ep.capabilities.allowFlying, false, true)) {
+            tag.setBoolean(TAG_OWNS_FLIGHT, true);
+            ep.capabilities.allowFlying = true;
+            ep.sendPlayerAbilities();
+        } else if (FlightCharmLogic.shouldRestoreOwnedFlight(
+                ownsFlight, ep.capabilities.allowFlying, false, true)) {
+            ep.capabilities.allowFlying = true;
+            ep.sendPlayerAbilities();
+        }
+    }
+
+    private void releaseOwnedFlight(ItemStack stack, EntityPlayer ep) {
+        NBTTagCompound tag = getOrCreateTag(stack);
+        boolean ownsFlight = tag.getBoolean(TAG_OWNS_FLIGHT);
+
+        if (FlightCharmLogic.shouldReleaseOwnedFlight(
+                ownsFlight, ep.capabilities.isCreativeMode)) {
+            ep.capabilities.allowFlying = false;
+            ep.capabilities.isFlying = false;
+            ep.sendPlayerAbilities();
+        }
+        tag.setBoolean(TAG_OWNS_FLIGHT, false);
+    }
+
+    private void tickFlightConsumption(ItemStack stack, EntityPlayer ep) {
+        NBTTagCompound tag = getOrCreateTag(stack);
+        boolean ownsFlight = tag.getBoolean(TAG_OWNS_FLIGHT);
+        boolean hasEnoughFood = ep.getFoodStats().getFoodLevel() >= MIN_FOOD_LEVEL;
+
+        if (!FlightCharmLogic.shouldCountFlight(
+                ownsFlight, ep.capabilities.isFlying,
+                ep.capabilities.isCreativeMode, hasEnoughFood)) {
+            return;
+        }
+
+        int timer = tag.getInteger(TAG_FLY_TIMER);
+        if (FlightCharmLogic.shouldChargeOnNextTick(timer, FOOD_COST_INTERVAL)) {
+            ep.getFoodStats().addExhaustion(EXHAUSTION_COST);
+        }
+        tag.setInteger(TAG_FLY_TIMER,
+                FlightCharmLogic.nextTimer(timer, FOOD_COST_INTERVAL));
+    }
+
+    private NBTTagCompound getOrCreateTag(ItemStack stack) {
         if (!stack.hasTagCompound()) {
             stack.setTagCompound(new NBTTagCompound());
         }
-        NBTTagCompound tag = stack.getTagCompound();
-
-        int timer = tag.getInteger(TAG_FLY_TIMER);
-        timer++;
-
-        if (timer >= FOOD_COST_INTERVAL) {
-            ep.getFoodStats().addExhaustion(EXHAUSTION_COST);
-            timer = 0;
-        }
-
-        tag.setInteger(TAG_FLY_TIMER, timer);
+        return stack.getTagCompound();
     }
 }
