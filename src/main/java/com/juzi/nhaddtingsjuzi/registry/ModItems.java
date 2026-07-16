@@ -14,7 +14,7 @@ public final class ModItems {
 
     public static void register() {
         flightCharm = new ItemFlightCharm();
-        flightCharm.setCreativeTab(NHAddTingsJuzi.tabNHAddTings);
+        flightCharm.setCreativeTab(NHAddTingsJuzi.TAB_NH_ADD_TINGS);
         GameRegistry.registerItem(flightCharm, FLIGHT_CHARM_ID);
     }
 }
