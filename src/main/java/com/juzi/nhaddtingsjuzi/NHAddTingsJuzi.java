@@ -14,7 +14,11 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-@Mod(modid = NHAddTingsJuzi.MODID, name = NHAddTingsJuzi.NAME, version = NHAddTingsJuzi.VERSION)
+@Mod(
+        modid = NHAddTingsJuzi.MODID,
+        name = NHAddTingsJuzi.NAME,
+        version = NHAddTingsJuzi.VERSION,
+        dependencies = "required-after:gregtech;required-after:IC2")
 public class NHAddTingsJuzi
 {
     public static final String MODID = "nh_addtings_juzi";

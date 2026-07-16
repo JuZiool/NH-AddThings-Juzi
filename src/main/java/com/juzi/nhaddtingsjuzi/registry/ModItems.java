@@ -7,6 +7,7 @@ import com.juzi.nhaddtingsjuzi.item.ItemTieredVajra;
 import cpw.mods.fml.common.registry.GameRegistry;
 import gregtech.api.GregTechAPI;
 import gregtech.api.enums.ToolDictNames;
+import gregtech.api.objects.GTItemStack;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -32,12 +33,17 @@ public final class ModItems {
 
     private static void registerVajraToolIdentities() {
         ItemStack stack = new ItemStack(hvVajra, 1, OreDictionary.WILDCARD_VALUE);
-        GregTechAPI.registerWrench(stack);
-        GregTechAPI.registerWireCutter(stack);
+        GTItemStack toolKey = new GTItemStack(stack);
+        VajraSpecialToolRegistration.register(
+                toolKey,
+                GregTechAPI.sToolList,
+                GregTechAPI.sWrenchList,
+                GregTechAPI.sWireCutterList);
         OreDictionary.registerOre(ToolDictNames.craftingToolPickaxe.name(), stack);
         OreDictionary.registerOre(ToolDictNames.craftingToolShovel.name(), stack);
         OreDictionary.registerOre(ToolDictNames.craftingToolAxe.name(), stack);
         OreDictionary.registerOre(ToolDictNames.craftingToolWrench.name(), stack);
         OreDictionary.registerOre(ToolDictNames.craftingToolWireCutter.name(), stack);
     }
+
 }
