@@ -1,5 +1,8 @@
 package com.juzi.nhaddtingsjuzi;
 
+import com.juzi.nhaddtingsjuzi.registry.ModItems;
+import com.juzi.nhaddtingsjuzi.registry.ModRecipes;
+
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -9,7 +12,6 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -20,15 +22,12 @@ public class NHAddTingsJuzi
     public static final String NAME = "NH-AddTings-Juzi";
     public static final String VERSION = "0.1.0b";
 
-    /** 飞行符咒物品实例 */
-    public static Item flightCharm;
-
     /** 本模组专属创造模式标签页 */
     public static CreativeTabs tabNHAddTings = new CreativeTabs("nh_addtings_juzi") {
         @Override
         @SideOnly(Side.CLIENT)
         public Item getTabIconItem() {
-            return flightCharm != null ? flightCharm : net.minecraft.init.Items.feather;
+            return ModItems.flightCharm != null ? ModItems.flightCharm : net.minecraft.init.Items.feather;
         }
         @Override
         @SideOnly(Side.CLIENT)
@@ -40,9 +39,7 @@ public class NHAddTingsJuzi
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         // 注册飞行符咒物品
-        flightCharm = new com.juzi.nhaddtingsjuzi.item.ItemFlightCharm()
-                .setCreativeTab(tabNHAddTings);
-        GameRegistry.registerItem(flightCharm, "flight_charm");
+        ModItems.register();
 
         // 注册纹理事件（客户端专用）
         MinecraftForge.EVENT_BUS.register(this);
@@ -61,7 +58,7 @@ public class NHAddTingsJuzi
     public void init(FMLInitializationEvent event)
     {
         // 注册奥术合成配方
-        com.juzi.nhaddtingsjuzi.recipe.RecipeArcane.register();
+        ModRecipes.register();
         System.out.println(NAME + " v" + VERSION + " loaded!");
     }
 }
