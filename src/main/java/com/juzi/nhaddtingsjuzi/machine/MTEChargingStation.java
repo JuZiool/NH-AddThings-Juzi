@@ -19,6 +19,7 @@ import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
 import com.gtnewhorizons.modularui.common.widget.CycleButtonWidget;
+import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
@@ -61,6 +62,7 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
     private int serviceCursor;
     private int eligibleOnlinePlayers;
     private boolean enabled = true;
+    private ChargingStationUiState clientUiState = ChargingStationUiState.empty();
 
     public MTEChargingStation(int id, String name, String regionalName, int machineTier) {
         super(id, name, regionalName, machineTier,
@@ -200,6 +202,7 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
                 return getStatusText();
             }
         }));
+        addUiStateSyncers(builder);
         builder.widget(new CycleButtonWidget()
                 .setToggle(new Supplier<Boolean>() {
                     @Override
@@ -252,7 +255,7 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
 
     static TextWidget createStatusTextWidget(Supplier<String> textSupplier) {
         TextWidget statusText = TextWidget.dynamicString(textSupplier)
-                .setSynced(true)
+                .setSynced(false)
                 .setTextAlignment(Alignment.TopLeft);
         statusText.setInternalName("nh_addtings_juzi.charging_station");
         statusText.setPos(32, 18);
@@ -266,7 +269,23 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
 
 
     private String getStatusText() {
-        return ChargingStationLogic.compactGuiStatus(getInfoData());
+        return ChargingStationLogic.compactGuiStatus(
+                getDisplayUiState().localizedLines(new ChargingStationUiState.Localizer() {
+                    @Override
+                    public String text(String key) {
+                        return StatCollector.translateToLocal(key);
+                    }
+
+                    @Override
+                    public String text(String key, Object... arguments) {
+                        return StatCollector.translateToLocalFormatted(key, arguments);
+                    }
+                }, new Function<Long, String>() {
+                    @Override
+                    public String apply(Long value) {
+                        return GTUtility.formatNumbers(value);
+                    }
+                }));
     }
 
     public boolean isGivingInformation() {
@@ -282,36 +301,159 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
     }
 
     public String[] getInfoData() {
+        return buildUiState().localizedLines(new ChargingStationUiState.Localizer() {
+            @Override
+            public String text(String key) {
+                return StatCollector.translateToLocal(key);
+            }
+
+            @Override
+            public String text(String key, Object... arguments) {
+                return StatCollector.translateToLocalFormatted(key, arguments);
+            }
+        }, new Function<Long, String>() {
+            @Override
+            public String apply(Long value) {
+                return GTUtility.formatNumbers(value);
+            }
+        });
+    }
+
+    private ChargingStationUiState buildUiState() {
         IGregTechTileEntity base = getBaseMetaTileEntity();
         String tierName = activeTier == null ? "-" : activeTier.name();
         int radius = activeTier == null ? 0 : activeTier.getRadius();
         int amperage = activeTier == null ? 0 : getCircuitCount();
         long output = ChargingStationLogic.tickBudget(activeTier, amperage);
-        return new String[] {
-                StatCollector.translateToLocalFormatted(
-                        "nh_addtings_juzi.charging_station.status",
-                        enabled
-                                ? StatCollector.translateToLocal("nh_addtings_juzi.charging_station.enabled")
-                                : StatCollector.translateToLocal("nh_addtings_juzi.charging_station.disabled")),
-                StatCollector.translateToLocalFormatted(
-                        "nh_addtings_juzi.charging_station.tier", tierName),
-                StatCollector.translateToLocalFormatted(
-                        "nh_addtings_juzi.charging_station.output",
-                        amperage, GTUtility.formatNumbers(output)),
-                StatCollector.translateToLocalFormatted(
-                        "nh_addtings_juzi.charging_station.energy",
-                        GTUtility.formatNumbers(base == null ? 0L : base.getStoredEU()),
-                        GTUtility.formatNumbers(maxEUStore())),
-                StatCollector.translateToLocalFormatted(
-                        "nh_addtings_juzi.charging_station.owner",
-                        base == null ? "-" : base.getOwnerName()),
-                StatCollector.translateToLocalFormatted(
-                        "nh_addtings_juzi.charging_station.players", eligibleOnlinePlayers),
-                StatCollector.translateToLocalFormatted(
-                        "nh_addtings_juzi.charging_station.targets", targets.size()),
-                StatCollector.translateToLocalFormatted(
-                        "nh_addtings_juzi.charging_station.radius", radius)
-        };
+        return new ChargingStationUiState(
+                enabled,
+                tierName,
+                amperage,
+                output,
+                base == null ? 0L : base.getStoredEU(),
+                maxEUStore(),
+                base == null ? "-" : base.getOwnerName(),
+                eligibleOnlinePlayers,
+                targets.size(),
+                radius);
+    }
+
+    private ChargingStationUiState getDisplayUiState() {
+        return getBaseMetaTileEntity() != null && getBaseMetaTileEntity().isServerSide()
+                ? buildUiState() : clientUiState;
+    }
+
+    private void addUiStateSyncers(ModularWindow.Builder builder) {
+        builder.widget(new FakeSyncWidget.BooleanSyncer(new Supplier<Boolean>() {
+            @Override
+            public Boolean get() {
+                return buildUiState().isEnabled();
+            }
+        }, new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean value) {
+                clientUiState = clientUiState.withEnabled(value);
+            }
+        }));
+        builder.widget(new FakeSyncWidget.StringSyncer(new Supplier<String>() {
+            @Override
+            public String get() {
+                return buildUiState().getTierName();
+            }
+        }, new Consumer<String>() {
+            @Override
+            public void accept(String value) {
+                clientUiState = clientUiState.withTierName(value);
+            }
+        }));
+        builder.widget(new FakeSyncWidget.IntegerSyncer(new Supplier<Integer>() {
+            @Override
+            public Integer get() {
+                return buildUiState().getAmperage();
+            }
+        }, new Consumer<Integer>() {
+            @Override
+            public void accept(Integer value) {
+                clientUiState = clientUiState.withAmperage(value);
+            }
+        }));
+        builder.widget(new FakeSyncWidget.LongSyncer(new Supplier<Long>() {
+            @Override
+            public Long get() {
+                return buildUiState().getOutputEuPerTick();
+            }
+        }, new Consumer<Long>() {
+            @Override
+            public void accept(Long value) {
+                clientUiState = clientUiState.withOutputEuPerTick(value);
+            }
+        }));
+        builder.widget(new FakeSyncWidget.LongSyncer(new Supplier<Long>() {
+            @Override
+            public Long get() {
+                return buildUiState().getStoredEu();
+            }
+        }, new Consumer<Long>() {
+            @Override
+            public void accept(Long value) {
+                clientUiState = clientUiState.withStoredEu(value);
+            }
+        }));
+        builder.widget(new FakeSyncWidget.LongSyncer(new Supplier<Long>() {
+            @Override
+            public Long get() {
+                return buildUiState().getMaxStoredEu();
+            }
+        }, new Consumer<Long>() {
+            @Override
+            public void accept(Long value) {
+                clientUiState = clientUiState.withMaxStoredEu(value);
+            }
+        }));
+        builder.widget(new FakeSyncWidget.StringSyncer(new Supplier<String>() {
+            @Override
+            public String get() {
+                return buildUiState().getOwnerName();
+            }
+        }, new Consumer<String>() {
+            @Override
+            public void accept(String value) {
+                clientUiState = clientUiState.withOwnerName(value);
+            }
+        }));
+        builder.widget(new FakeSyncWidget.IntegerSyncer(new Supplier<Integer>() {
+            @Override
+            public Integer get() {
+                return buildUiState().getEligibleOnlinePlayers();
+            }
+        }, new Consumer<Integer>() {
+            @Override
+            public void accept(Integer value) {
+                clientUiState = clientUiState.withEligibleOnlinePlayers(value);
+            }
+        }));
+        builder.widget(new FakeSyncWidget.IntegerSyncer(new Supplier<Integer>() {
+            @Override
+            public Integer get() {
+                return buildUiState().getCachedTargets();
+            }
+        }, new Consumer<Integer>() {
+            @Override
+            public void accept(Integer value) {
+                clientUiState = clientUiState.withCachedTargets(value);
+            }
+        }));
+        builder.widget(new FakeSyncWidget.IntegerSyncer(new Supplier<Integer>() {
+            @Override
+            public Integer get() {
+                return buildUiState().getRadius();
+            }
+        }, new Consumer<Integer>() {
+            @Override
+            public void accept(Integer value) {
+                clientUiState = clientUiState.withRadius(value);
+            }
+        }));
     }
 
     @Override
