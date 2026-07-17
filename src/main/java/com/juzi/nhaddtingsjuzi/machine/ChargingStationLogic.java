@@ -87,4 +87,9 @@ public final class ChargingStationLogic {
                                                    boolean hasEnergyInput) {
         return !chargingStation && inputVoltage > 0L && hasEnergyInput;
     }
+
+    static boolean shouldMirrorHeldItemSnapshot(boolean currentlyHeld,
+                                                 double acceptedCharge) {
+        return currentlyHeld && acceptedCharge > 0.0D;
+    }
 }

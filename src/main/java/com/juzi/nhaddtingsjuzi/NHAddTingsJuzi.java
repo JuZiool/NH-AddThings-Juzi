@@ -1,6 +1,8 @@
 package com.juzi.nhaddtingsjuzi;
 
 import com.juzi.nhaddtingsjuzi.client.ClientEventHandler;
+import com.juzi.nhaddtingsjuzi.network.ModNetwork;
+import com.juzi.nhaddtingsjuzi.network.ModNetworkClient;
 import com.juzi.nhaddtingsjuzi.registry.ModItems;
 import com.juzi.nhaddtingsjuzi.registry.ModMachines;
 import com.juzi.nhaddtingsjuzi.registry.ModRecipes;
@@ -28,7 +30,7 @@ public class NHAddTingsJuzi
 {
     public static final String MODID = "nh_addtings_juzi";
     public static final String NAME = "NH-AddTings-Juzi";
-    public static final String VERSION = "0.1.4b";
+    public static final String VERSION = "0.1.4c";
 
     /** 本模组专属创造模式标签页 */
     public static CreativeTabs TAB_NH_ADD_TINGS = new CreativeTabs("nh_addtings_juzi") {
@@ -53,6 +55,10 @@ public class NHAddTingsJuzi
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        ModNetwork.register();
+        if (event.getSide() == Side.CLIENT) {
+            ModNetworkClient.register();
+        }
         // 注册飞行符咒物品
         ModItems.register();
         ModMachines.register();

@@ -115,4 +115,11 @@ public class ChargingStationLogicTest {
         assertEquals(false, ChargingStationLogic.isEligibleMachineTarget(false, 512L, false));
         assertEquals(true, ChargingStationLogic.isEligibleMachineTarget(false, 512L, true));
     }
+
+    @Test
+    public void mirrorsOnlyHeldItemChargesIntoContainerSnapshot() {
+        assertEquals(true, ChargingStationLogic.shouldMirrorHeldItemSnapshot(true, 1.0D));
+        assertEquals(false, ChargingStationLogic.shouldMirrorHeldItemSnapshot(true, 0.0D));
+        assertEquals(false, ChargingStationLogic.shouldMirrorHeldItemSnapshot(false, 1.0D));
+    }
 }

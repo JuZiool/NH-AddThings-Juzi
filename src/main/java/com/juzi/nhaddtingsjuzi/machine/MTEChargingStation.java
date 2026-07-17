@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 
 import com.juzi.nhaddtingsjuzi.compat.PlayerElectricInventory;
 import com.juzi.nhaddtingsjuzi.compat.ServerUtilitiesTeamResolver;
+import com.juzi.nhaddtingsjuzi.network.ModNetwork;
 
 import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.api.screen.ModularWindow;
@@ -56,7 +57,8 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
     private final ServerUtilitiesTeamResolver teamResolver = new ServerUtilitiesTeamResolver();
     private final List<TargetPosition> targets = new ArrayList<TargetPosition>();
     private final Set<TargetPosition> targetSet = new HashSet<TargetPosition>();
-    private List<ItemStack> playerItems = Collections.emptyList();
+    private List<PlayerElectricInventory.PlayerItem> playerItems =
+            Collections.emptyList();
     private ChargingStationTier activeTier;
     private int discoveryCursor;
     private int serviceCursor;
@@ -488,18 +490,22 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
     private void refreshPlayerItems(IGregTechTileEntity base) {
         UUID owner = base.getOwnerUuid();
         MinecraftServer server = MinecraftServer.getServer();
-        List<ItemStack> candidates = new ArrayList<ItemStack>();
+        List<PlayerElectricInventory.PlayerItem> candidates =
+                new ArrayList<PlayerElectricInventory.PlayerItem>();
         List<EntityPlayerMP> players = teamResolver.resolve(owner, server);
         eligibleOnlinePlayers = players.size();
         for (EntityPlayerMP player : players) {
             candidates.addAll(PlayerElectricInventory.collect(player));
         }
-        Collections.sort(candidates, new Comparator<ItemStack>() {
-            @Override
-            public int compare(ItemStack first, ItemStack second) {
-                return Double.compare(chargeRatio(first), chargeRatio(second));
-            }
-        });
+        Collections.sort(candidates,
+                new Comparator<PlayerElectricInventory.PlayerItem>() {
+                    @Override
+                    public int compare(PlayerElectricInventory.PlayerItem first,
+                                       PlayerElectricInventory.PlayerItem second) {
+                        return Double.compare(chargeRatio(first.getStack()),
+                                chargeRatio(second.getStack()));
+                    }
+                });
         playerItems = candidates;
     }
 
@@ -514,7 +520,8 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
 
     private long chargePlayers(long budget) {
         long used = 0L;
-        for (ItemStack stack : playerItems) {
+        for (PlayerElectricInventory.PlayerItem playerItem : playerItems) {
+            ItemStack stack = playerItem.getStack();
             if (used >= budget || !(stack.getItem() instanceof IElectricItem)) {
                 continue;
             }
@@ -529,6 +536,12 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
                     false,
                     false);
             used += (long) Math.ceil(accepted);
+            if (ChargingStationLogic.shouldMirrorHeldItemSnapshot(
+                    playerItem.isCurrentlyHeld(), accepted)) {
+                ModNetwork.syncHeldItem(
+                        (EntityPlayerMP) playerItem.getPlayer(),
+                        playerItem.getMainInventorySlot(), stack, accepted);
+            }
         }
         return used;
     }

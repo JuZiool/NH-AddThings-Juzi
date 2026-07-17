@@ -1,0 +1,84 @@
+package com.juzi.nhaddtingsjuzi.network;
+
+import java.util.List;
+
+import com.juzi.nhaddtingsjuzi.NHAddTingsJuzi;
+
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import ic2.api.item.ElectricItem;
+import net.minecraft.item.ItemStack;
+
+public final class ModNetwork {
+
+    private static final SimpleNetworkWrapper CHANNEL = NetworkRegistry.INSTANCE
+            .newSimpleChannel(NHAddTingsJuzi.MODID);
+    private static boolean registered;
+
+    private ModNetwork() {}
+
+    public static void register() {
+        if (registered) {
+            return;
+        }
+        CHANNEL.registerMessage(ServerMessageHandler.class,
+                HeldItemChargeMessage.class, 0, Side.SERVER);
+        registered = true;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static void registerClient() {
+        CHANNEL.registerMessage(HeldItemChargeHandler.class,
+                HeldItemChargeMessage.class, 0, Side.CLIENT);
+    }
+
+    static SimpleNetworkWrapper getChannel() {
+        return CHANNEL;
+    }
+
+    public static void syncHeldItem(EntityPlayerMP player, int inventorySlot,
+                                    ItemStack stack, double acceptedCharge) {
+        if (inventorySlot < 0 || player.inventory.currentItem != inventorySlot) {
+            return;
+        }
+
+        updateContainerSnapshot(player.openContainer, player, inventorySlot, stack);
+        if (player.inventoryContainer != player.openContainer) {
+            updateContainerSnapshot(player.inventoryContainer, player, inventorySlot, stack);
+        }
+        CHANNEL.sendTo(new HeldItemChargeMessage(
+                inventorySlot, stack, acceptedCharge), player);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void updateContainerSnapshot(Container container,
+                                                EntityPlayerMP player,
+                                                int inventorySlot,
+                                                ItemStack stack) {
+        Slot slot = container.getSlotFromInventory(player.inventory, inventorySlot);
+        if (slot == null) {
+            return;
+        }
+        List<ItemStack> snapshots = container.inventoryItemStacks;
+        if (slot.slotNumber >= 0 && slot.slotNumber < snapshots.size()) {
+            snapshots.set(slot.slotNumber, stack.copy());
+        }
+    }
+
+    public static final class ServerMessageHandler
+            implements IMessageHandler<HeldItemChargeMessage, IMessage> {
+
+        @Override
+        public IMessage onMessage(HeldItemChargeMessage message, MessageContext context) {
+            return null;
+        }
+    }
+}

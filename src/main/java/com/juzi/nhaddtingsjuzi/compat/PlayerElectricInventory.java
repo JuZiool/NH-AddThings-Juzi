@@ -12,15 +12,15 @@ public final class PlayerElectricInventory {
 
     private PlayerElectricInventory() {}
 
-    public static List<ItemStack> collect(EntityPlayer player) {
-        List<ItemStack> stacks = new ArrayList<ItemStack>();
-        addAll(stacks, player.inventory.mainInventory);
-        addAll(stacks, player.inventory.armorInventory);
+    public static List<PlayerItem> collect(EntityPlayer player) {
+        List<PlayerItem> stacks = new ArrayList<PlayerItem>();
+        addAll(stacks, player, player.inventory.mainInventory, 0);
+        addAll(stacks, player, player.inventory.armorInventory, -1);
         try {
             IInventory baubles = BaublesApi.getBaubles(player);
             if (baubles != null) {
                 for (int slot = 0; slot < baubles.getSizeInventory(); slot++) {
-                    add(stacks, baubles.getStackInSlot(slot));
+                    add(stacks, player, baubles.getStackInSlot(slot), -1);
                 }
             }
         } catch (Throwable ignored) {
@@ -28,15 +28,49 @@ public final class PlayerElectricInventory {
         return stacks;
     }
 
-    private static void addAll(List<ItemStack> stacks, ItemStack[] inventory) {
-        for (ItemStack stack : inventory) {
-            add(stacks, stack);
+    private static void addAll(List<PlayerItem> stacks, EntityPlayer player,
+                               ItemStack[] inventory, int slotOffset) {
+        for (int slot = 0; slot < inventory.length; slot++) {
+            add(stacks, player, inventory[slot],
+                    slotOffset < 0 ? -1 : slotOffset + slot);
         }
     }
 
-    private static void add(List<ItemStack> stacks, ItemStack stack) {
+    private static void add(List<PlayerItem> stacks, EntityPlayer player,
+                            ItemStack stack, int mainInventorySlot) {
         if (stack != null && stack.stackSize > 0) {
-            stacks.add(stack);
+            stacks.add(new PlayerItem(player, stack, mainInventorySlot));
+        }
+    }
+
+    public static final class PlayerItem {
+
+        private final EntityPlayer player;
+        private final ItemStack stack;
+        private final int mainInventorySlot;
+
+        private PlayerItem(EntityPlayer player, ItemStack stack, int mainInventorySlot) {
+            this.player = player;
+            this.stack = stack;
+            this.mainInventorySlot = mainInventorySlot;
+        }
+
+        public EntityPlayer getPlayer() {
+            return player;
+        }
+
+        public ItemStack getStack() {
+            return stack;
+        }
+
+        public int getMainInventorySlot() {
+            return mainInventorySlot;
+        }
+
+        public boolean isCurrentlyHeld() {
+            return mainInventorySlot >= 0
+                    && player.inventory.currentItem == mainInventorySlot
+                    && player.getHeldItem() == stack;
         }
     }
 }
