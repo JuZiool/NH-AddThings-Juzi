@@ -43,10 +43,10 @@ public final class ChargingStationLogic {
             return "";
         }
         StringBuilder text = new StringBuilder(lines[0]);
-        text.append('\n')
+        text.append("  ").append(lines[7])
+                .append('\n')
                 .append(lines[1]).append("  ")
-                .append(lines[2]).append("  ")
-                .append(lines[7]);
+                .append(lines[2]);
         for (int index = 3; index < 7; index++) {
             text.append('\n').append(lines[index]);
         }

@@ -71,7 +71,7 @@ public class ChargingStationLogicTest {
     @Test
     public void compactsStatusTierOutputAndRadiusForGui() {
         assertEquals(
-                "状态：已启用\n等级：HV  输出：8 A（4,096 EU/t）  半径：64 格\n储存 EU：100 / 200\n所有者：JuZiool\n符合条件的在线玩家：1\n已缓存 GT 机器：2",
+                "状态：已启用  半径：64 格\n等级：HV  输出：8 A（4,096 EU/t）\n储存 EU：100 / 200\n所有者：JuZiool\n符合条件的在线玩家：1\n已缓存 GT 机器：2",
                 ChargingStationLogic.compactGuiStatus(new String[] {
                         "状态：已启用",
                         "等级：HV",

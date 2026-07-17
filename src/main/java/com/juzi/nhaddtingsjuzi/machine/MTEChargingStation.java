@@ -15,6 +15,7 @@ import java.util.function.Supplier;
 import com.juzi.nhaddtingsjuzi.compat.PlayerElectricInventory;
 import com.juzi.nhaddtingsjuzi.compat.ServerUtilitiesTeamResolver;
 
+import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
 import com.gtnewhorizons.modularui.common.widget.CycleButtonWidget;
@@ -63,7 +64,7 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
 
     public MTEChargingStation(int id, String name, String regionalName, int machineTier) {
         super(id, name, regionalName, machineTier,
-                "Charges the owner's team and nearby GT machines");
+                ChargingStationUiSpec.description());
     }
 
     private MTEChargingStation(String name, int tier, int slots,
@@ -191,22 +192,14 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
 
     @Override
     public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext context) {
-        builder.bindPlayerInventory(context.getPlayer());
-        builder.widget(new SlotWidget(inventoryHandler, CIRCUIT_SLOT)
-                .setFilter(new Predicate<ItemStack>() {
-                    @Override
-                    public boolean test(ItemStack stack) {
-                        return resolveTier(stack) != null;
-                    }
-                })
-                .setBackground(getGUITextureSet().getItemSlot(), GTUITextures.OVERLAY_SLOT_CIRCUIT)
-                .setPos(8, 18));
-        builder.widget(TextWidget.dynamicString(new Supplier<String>() {
+        // GregTech binds the player inventory before it calls this method.
+        builder.widget(createCircuitSlotWidget());
+        builder.widget(createStatusTextWidget(new Supplier<String>() {
             @Override
             public String get() {
                 return getStatusText();
             }
-        }).setSynced(true).setPos(32, 18));
+        }));
         builder.widget(new CycleButtonWidget()
                 .setToggle(new Supplier<Boolean>() {
                     @Override
@@ -241,6 +234,29 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
                 })
                 .setPos(8, 42)
                 .setSize(18, 18));
+    }
+
+    SlotWidget createCircuitSlotWidget() {
+        SlotWidget circuitSlot = new ChargingStationInteractionGuard(inventoryHandler, CIRCUIT_SLOT);
+        circuitSlot.disableShiftInsert();
+        circuitSlot.setFilter(new Predicate<ItemStack>() {
+            @Override
+            public boolean test(ItemStack stack) {
+                return resolveTier(stack) != null;
+            }
+        });
+        circuitSlot.setBackground(getGUITextureSet().getItemSlot(), GTUITextures.OVERLAY_SLOT_CIRCUIT);
+        circuitSlot.setPos(8, 18);
+        return circuitSlot;
+    }
+
+    static TextWidget createStatusTextWidget(Supplier<String> textSupplier) {
+        TextWidget statusText = TextWidget.dynamicString(textSupplier)
+                .setSynced(true)
+                .setTextAlignment(Alignment.TopLeft);
+        statusText.setInternalName("nh_addtings_juzi.charging_station");
+        statusText.setPos(32, 18);
+        return statusText;
     }
 
     private int getCircuitCount() {
