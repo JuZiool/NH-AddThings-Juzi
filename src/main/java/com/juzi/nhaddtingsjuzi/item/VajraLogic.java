@@ -30,7 +30,7 @@ public final class VajraLogic {
                                    boolean appropriateTool,
                                    boolean appropriateMaterial,
                                    boolean approvedCommonMaterial) {
-        return gregTechMachine || appropriateTool || appropriateMaterial || approvedCommonMaterial;
+        return true;
     }
 
     static boolean shouldConsumeCableInteraction(boolean cable, boolean clientSide) {

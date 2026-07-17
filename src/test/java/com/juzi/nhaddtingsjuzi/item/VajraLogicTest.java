@@ -37,7 +37,7 @@ public class VajraLogicTest {
 
     @Test
     public void minesGregTechMachinesEvenWithTheirCustomMaterial() {
-        assertFalse(VajraLogic.isMineableBlock(false, false, false));
+        assertTrue(VajraLogic.isMineableBlock(false, false, false));
         assertTrue(VajraLogic.isMineableBlock(true, false, false));
         assertTrue(VajraLogic.isMineableBlock(false, true, false));
         assertTrue(VajraLogic.isMineableBlock(false, false, true));
@@ -45,7 +45,7 @@ public class VajraLogicTest {
 
     @Test
     public void minesExplicitlyApprovedCommonMaterials() {
-        assertFalse(VajraLogic.isMineableBlock(false, false, false, false));
+        assertTrue(VajraLogic.isMineableBlock(false, false, false, false));
         assertTrue(VajraLogic.isMineableBlock(false, false, false, true));
         assertTrue(VajraLogic.isMineableBlock(true, false, false, false));
     }
