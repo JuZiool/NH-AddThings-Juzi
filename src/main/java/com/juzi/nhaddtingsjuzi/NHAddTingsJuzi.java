@@ -1,7 +1,6 @@
 package com.juzi.nhaddtingsjuzi;
 
 import com.juzi.nhaddtingsjuzi.client.ClientEventHandler;
-import com.juzi.nhaddtingsjuzi.client.BogoSorterCompat;
 import com.juzi.nhaddtingsjuzi.registry.ModItems;
 import com.juzi.nhaddtingsjuzi.registry.ModMachines;
 import com.juzi.nhaddtingsjuzi.registry.ModRecipes;
@@ -16,7 +15,6 @@ import net.minecraft.item.ItemStack;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -30,7 +28,7 @@ public class NHAddTingsJuzi
 {
     public static final String MODID = "nh_addtings_juzi";
     public static final String NAME = "NH-AddTings-Juzi";
-    public static final String VERSION = "0.1.2b";
+    public static final String VERSION = "0.1.4a";
 
     /** 本模组专属创造模式标签页 */
     public static CreativeTabs TAB_NH_ADD_TINGS = new CreativeTabs("nh_addtings_juzi") {
@@ -73,10 +71,4 @@ public class NHAddTingsJuzi
         System.out.println(NAME + " v" + VERSION + " loaded!");
     }
 
-    @EventHandler
-    public void postInit(FMLPostInitializationEvent event) {
-        if (event.getSide() == Side.CLIENT) {
-            BogoSorterCompat.register();
-        }
-    }
 }
