@@ -5,12 +5,14 @@ import com.juzi.nhaddtingsjuzi.registry.ModMachines;
 
 import codechicken.nei.api.API;
 import codechicken.nei.api.IConfigureNEI;
+import net.minecraft.item.ItemStack;
 
 public class NEIConfig implements IConfigureNEI {
 
     @Override
     public void loadConfig() {
-        API.addItemListEntry(ModMachines.chargingStationStack.copy());
+        ItemStack chargingStationStack = ModMachines.chargingStationStack.copy();
+        API.addItemVariant(chargingStationStack.getItem(), chargingStationStack);
         System.out.println("[NH-AddTings-Juzi] Added Charging Station to NEI item list");
     }
 
