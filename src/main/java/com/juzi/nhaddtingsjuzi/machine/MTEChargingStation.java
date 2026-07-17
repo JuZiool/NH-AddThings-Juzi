@@ -273,6 +273,14 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
         return true;
     }
 
+    @Override
+    public void addAdditionalTooltipInformation(ItemStack stack, List<String> tooltip) {
+        tooltip.add(StatCollector.translateToLocal(
+                "nh_addtings_juzi.charging_station.tooltip"));
+        tooltip.add(StatCollector.translateToLocal(
+                "nh_addtings_juzi.charging_station.tooltip.tiers"));
+    }
+
     public String[] getInfoData() {
         IGregTechTileEntity base = getBaseMetaTileEntity();
         String tierName = activeTier == null ? "-" : activeTier.name();
