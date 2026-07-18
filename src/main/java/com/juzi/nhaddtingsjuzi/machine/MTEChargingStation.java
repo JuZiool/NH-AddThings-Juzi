@@ -535,7 +535,9 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
                     activeTier.getElectricTier(),
                     false,
                     false);
-            used += (long) Math.ceil(accepted);
+            double boundedAccepted = Math.max(
+                    0.0D, Math.min(accepted, (double) (budget - used)));
+            used += (long) Math.ceil(boundedAccepted);
             if (ChargingStationLogic.shouldMirrorHeldItemSnapshot(
                     playerItem.isCurrentlyHeld(), accepted)) {
                 ModNetwork.syncHeldItem(
