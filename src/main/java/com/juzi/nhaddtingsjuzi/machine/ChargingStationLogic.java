@@ -53,10 +53,20 @@ public final class ChargingStationLogic {
     }
 
     public static long transferVoltage(long stationVoltage, long targetVoltage) {
-        if (stationVoltage <= 0L || targetVoltage <= 0L) {
+        if (stationVoltage <= 0L || targetVoltage <= 0L || targetVoltage > stationVoltage) {
             return 0L;
         }
-        return Math.min(stationVoltage, targetVoltage);
+        return targetVoltage;
+    }
+
+    public static long targetAmperage(long stationVoltage,
+                                      long targetVoltage,
+                                      long remainingBudget) {
+        long transferVoltage = transferVoltage(stationVoltage, targetVoltage);
+        if (transferVoltage <= 0L || remainingBudget <= 0L) {
+            return 0L;
+        }
+        return remainingBudget / transferVoltage;
     }
 
     public static int discoveryLimit() {
