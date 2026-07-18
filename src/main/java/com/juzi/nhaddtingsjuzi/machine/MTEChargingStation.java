@@ -585,7 +585,6 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
 
     private long supplyMachines(IGregTechTileEntity base, long budget) {
         long used = 0L;
-        int circuitCount = getCircuitCount();
         int index = 0;
         while (index < targets.size()) {
             TargetPosition position = targets.get(index);
@@ -611,8 +610,8 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
             long targetVoltage = target.getInputVoltage();
             long voltage = ChargingStationLogic.transferVoltage(
                     activeTier.getVoltage(), targetVoltage);
-            long availableAmperes = voltage <= 0L ? 0L : (budget - used) / voltage;
-            long amperes = Math.min(circuitCount, availableAmperes);
+            long amperes = ChargingStationLogic.targetAmperage(
+                    activeTier.getVoltage(), targetVoltage, budget - used);
             if (amperes > 0L) {
                 long accepted = injectFromAnySide(target, voltage, amperes);
                 used += accepted * voltage;
