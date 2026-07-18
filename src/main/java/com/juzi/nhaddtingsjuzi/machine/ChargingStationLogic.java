@@ -8,7 +8,6 @@ public final class ChargingStationLogic {
     private static final int CIRCUIT_SLOT_LIMIT = 16;
     private static final int BUFFER_TICKS = 400;
     private static final int DISCOVERY_LIMIT = 128;
-    private static final int SERVICE_LIMIT = 16;
 
     private ChargingStationLogic() {}
 
@@ -62,14 +61,6 @@ public final class ChargingStationLogic {
 
     public static int discoveryLimit() {
         return DISCOVERY_LIMIT;
-    }
-
-    public static int serviceLimit() {
-        return SERVICE_LIMIT;
-    }
-
-    public static int nextCursor(int cursor, int size) {
-        return size <= 0 ? 0 : (cursor + 1) % size;
     }
 
     public static boolean inRange(int sourceX, int sourceY, int sourceZ,

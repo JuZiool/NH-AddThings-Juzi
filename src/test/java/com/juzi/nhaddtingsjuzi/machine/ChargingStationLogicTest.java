@@ -93,12 +93,8 @@ public class ChargingStationLogicTest {
     }
 
     @Test
-    public void enforcesIncrementalLimitsAndRoundRobin() {
+    public void enforcesIncrementalDiscoveryWithoutServiceCap() {
         assertEquals(128, ChargingStationLogic.discoveryLimit());
-        assertEquals(16, ChargingStationLogic.serviceLimit());
-        assertEquals(0, ChargingStationLogic.nextCursor(0, 0));
-        assertEquals(0, ChargingStationLogic.nextCursor(3, 4));
-        assertEquals(3, ChargingStationLogic.nextCursor(2, 5));
     }
 
     @Test

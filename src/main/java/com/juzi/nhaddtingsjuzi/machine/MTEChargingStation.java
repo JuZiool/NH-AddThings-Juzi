@@ -583,15 +583,12 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
 
     private long supplyMachines(IGregTechTileEntity base, long budget) {
         long used = 0L;
-        int serviced = 0;
-        while (used < budget && serviced < ChargingStationLogic.serviceLimit()
-                && !targets.isEmpty()) {
-            if (serviceCursor >= targets.size()) {
-                serviceCursor = 0;
-            }
-            TargetPosition position = targets.get(serviceCursor);
+        int circuitCount = getCircuitCount();
+        int index = 0;
+        while (index < targets.size()) {
+            TargetPosition position = targets.get(index);
             if (!base.getWorld().blockExists(position.x, position.y, position.z)) {
-                removeTarget(serviceCursor);
+                removeTarget(index);
                 continue;
             }
             TileEntity tile = base.getWorld().getTileEntity(position.x, position.y, position.z);
@@ -600,26 +597,25 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
                             base.getXCoord(), base.getYCoord(), base.getZCoord(),
                             position.x, position.y, position.z,
                             activeTier.getRadius())) {
-                removeTarget(serviceCursor);
+                removeTarget(index);
                 continue;
             }
 
             IGregTechTileEntity target = (IGregTechTileEntity) tile;
             if (!isEligibleMachineTarget(target)) {
-                removeTarget(serviceCursor);
+                removeTarget(index);
                 continue;
             }
             long targetVoltage = target.getInputVoltage();
             long voltage = ChargingStationLogic.transferVoltage(
                     activeTier.getVoltage(), targetVoltage);
             long availableAmperes = voltage <= 0L ? 0L : (budget - used) / voltage;
-            long amperes = Math.min(getCircuitCount(), availableAmperes);
+            long amperes = Math.min(circuitCount, availableAmperes);
             if (amperes > 0L) {
                 long accepted = injectFromAnySide(target, voltage, amperes);
                 used += accepted * voltage;
             }
-            serviceCursor = ChargingStationLogic.nextCursor(serviceCursor, targets.size());
-            serviced++;
+            index++;
         }
         return used;
     }
@@ -649,16 +645,12 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
     private void removeTarget(int index) {
         TargetPosition removed = targets.remove(index);
         targetSet.remove(removed);
-        if (serviceCursor >= targets.size()) {
-            serviceCursor = 0;
-        }
     }
 
     private void clearTargets() {
         targets.clear();
         targetSet.clear();
         discoveryCursor = 0;
-        serviceCursor = 0;
     }
 
     private static final class TargetPosition {

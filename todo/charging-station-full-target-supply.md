@@ -1,6 +1,6 @@
 # 充电站后续改造待办
 
-状态：待实现  
+状态：实现中
 创建日期：2026-07-17
 
 ## 目标
@@ -30,9 +30,9 @@
 
 ## 需要修改的代码
 
-- [ ] 删除 `SERVICE_LIMIT = 16` 及其运行时调用。
-- [ ] 修改 `MTEChargingStation.supplyMachines()`，每 Tick 遍历全部缓存目标。
-- [ ] 移除 `serviceCursor` 对机器供电调度的影响。
+- [x] 删除 `SERVICE_LIMIT = 16` 及其运行时调用。
+- [x] 修改 `MTEChargingStation.supplyMachines()`，每 Tick 遍历全部缓存目标。
+- [x] 移除 `serviceCursor` 对机器供电调度的影响。
 - [ ] 保留旧 `ChargingStationServiceCursor` NBT 字段的兼容读取/保存，避免破坏旧存档。
 - [ ] 保留玩家优先逻辑。
 - [ ] 保留目标安全降压：`min(充电站电压, 目标输入电压)`。
@@ -56,32 +56,31 @@
 
 ## 文档要求
 
-- [ ] 更新 README 中的机器供电描述。
-- [ ] 删除或改写旧的“每 Tick 最多服务 16 个目标”描述。
-- [ ] 删除或改写旧的“按轮询顺序供电”描述。
-- [ ] 明确说明所有目标共享全局预算，并按实际接受量扣费。
+- [x] 更新 README 中的机器供电描述。
+- [x] 删除或改写旧的“每 Tick 最多服务 16 个目标”描述。
+- [x] 删除或改写旧的“按轮询顺序供电”描述。
+- [x] 明确说明所有目标共享全局预算，并按实际接受量扣费。
 
 ## 构建与测试交付
 
-- [ ] 从 `master` 创建功能分支实现。
-- [ ] 运行充电站相关测试。
-- [ ] 运行 `clean test build`。
-- [ ] 确认生成：`build/libs/NH-AddTings-Juzi-0.1.4c.jar`。
-- [ ] 复制到客户端：
+- [ ] 不创建本地功能分支；直接在当前 `master` 实现。
+- [x] 运行充电站相关测试和 `clean test build`。
+- [x] 确认生成：`build/libs/NH-AddTings-Juzi-0.1.5a.jar`。
+- [x] 复制到客户端：
 
 ```text
-D:\Ai工作区\GTNH-mod-plus\GTNH客户端\.minecraft\versions\GT New Horizons 2.8.4\mods\NH-AddTings-Juzi-0.1.4c.jar
+D:\Ai工作区\GTNH客户端\.minecraft\versions\GT New Horizons 2.8.4\mods\NH-AddTings-Juzi-0.1.5a.jar
 ```
 
-- [ ] 用 SHA256 比对构建产物和客户端文件。
-- [ ] 保留功能分支，等待用户在游戏中测试。
+- [x] 用 SHA256 比对构建产物和客户端文件。
+- [x] 不创建本地功能分支，等待用户在游戏和服务端中测试。
 - [ ] 用户确认后再合并到 `master`。
 
 ## 当前基线
 
 ```text
 分支：master
-提交：98dc8bb release: prepare 0.1.4c
+提交：6eccdad release: prepare 0.1.4d
 ```
 
 本待办只记录方案，当前不修改充电站 Java 实现。
