@@ -30,7 +30,7 @@ public class NHAddTingsJuzi
 {
     public static final String MODID = "nh_addtings_juzi";
     public static final String NAME = "NH-AddTings-Juzi";
-    public static final String VERSION = "0.1.5a";
+    public static final String VERSION = "0.1.5b";
 
     /** 本模组专属创造模式标签页 */
     public static CreativeTabs TAB_NH_ADD_TINGS = new CreativeTabs("nh_addtings_juzi") {
