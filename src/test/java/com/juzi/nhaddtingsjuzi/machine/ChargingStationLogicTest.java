@@ -91,6 +91,7 @@ public class ChargingStationLogicTest {
         assertEquals(512L, ChargingStationLogic.transferVoltage(512L, 512L));
         assertEquals(0L, ChargingStationLogic.transferVoltage(512L, 2048L));
         assertEquals(0L, ChargingStationLogic.transferVoltage(512L, 0L));
+        assertEquals(0L, ChargingStationLogic.transferVoltage(512L, -1L));
     }
 
     @Test
@@ -109,6 +110,8 @@ public class ChargingStationLogicTest {
         assertEquals(1L, ChargingStationLogic.targetAmperage(512L, 512L, 512L));
         assertEquals(2L, ChargingStationLogic.targetAmperage(512L, 512L, 1535L));
         assertEquals(0L, ChargingStationLogic.targetAmperage(512L, 512L, 0L));
+        assertEquals(0L, ChargingStationLogic.targetAmperage(512L, 512L, -1L));
+        assertEquals(0L, ChargingStationLogic.targetAmperage(512L, -1L, 4096L));
     }
 
     @Test
