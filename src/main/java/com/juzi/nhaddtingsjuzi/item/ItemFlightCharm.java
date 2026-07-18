@@ -29,8 +29,8 @@ public class ItemFlightCharm extends Item implements IBaubleExpanded {
     public static IIcon icon;
 
     public ItemFlightCharm() {
-        this.setUnlocalizedName("flight_charm");
-        this.setMaxStackSize(1);
+        ((Item) this).setUnlocalizedName("flight_charm");
+        ((Item) this).setMaxStackSize(1);
     }
 
     // ========== 纹理 ==========

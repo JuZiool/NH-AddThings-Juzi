@@ -3,7 +3,12 @@ package com.juzi.nhaddtingsjuzi.registry;
 import com.juzi.nhaddtingsjuzi.NHAddTingsJuzi;
 import com.juzi.nhaddtingsjuzi.item.ItemFlightCharm;
 import com.juzi.nhaddtingsjuzi.item.ItemTieredVajra;
+import com.juzi.nhaddtingsjuzi.item.ItemUnrestrictedShell;
+import com.juzi.nhaddtingsjuzi.storage.UnrestrictedCellHandler;
+import com.juzi.nhaddtingsjuzi.storage.UnrestrictedCellItem;
+import com.juzi.nhaddtingsjuzi.storage.UnrestrictedFluidCellItem;
 
+import appeng.api.AEApi;
 import cpw.mods.fml.common.registry.GameRegistry;
 import gregtech.api.GregTechAPI;
 import gregtech.api.enums.ToolDictNames;
@@ -17,6 +22,15 @@ public final class ModItems {
     public static final String HV_VAJRA_ID = "hv_vajra";
     public static ItemFlightCharm flightCharm;
     public static ItemTieredVajra hvVajra;
+    public static ItemUnrestrictedShell unrestrictedShell;
+    public static UnrestrictedCellItem itemCell1k;
+    public static UnrestrictedCellItem itemCell4k;
+    public static UnrestrictedCellItem itemCell16k;
+    public static UnrestrictedCellItem itemCell64k;
+    public static UnrestrictedFluidCellItem fluidCell1k;
+    public static UnrestrictedFluidCellItem fluidCell4k;
+    public static UnrestrictedFluidCellItem fluidCell16k;
+    public static UnrestrictedFluidCellItem fluidCell64k;
 
     private ModItems() {}
 
@@ -29,6 +43,17 @@ public final class ModItems {
         hvVajra.setCreativeTab(NHAddTingsJuzi.TAB_NH_ADD_TINGS);
         GameRegistry.registerItem(hvVajra, HV_VAJRA_ID);
         registerVajraToolIdentities();
+        unrestrictedShell = new ItemUnrestrictedShell();
+        GameRegistry.registerItem(unrestrictedShell, "unrestricted_shell");
+        itemCell1k = UnrestrictedCellItem.create("unrestricted_item_cell_1k", 1024);
+        itemCell4k = UnrestrictedCellItem.create("unrestricted_item_cell_4k", 4096);
+        itemCell16k = UnrestrictedCellItem.create("unrestricted_item_cell_16k", 16384);
+        itemCell64k = UnrestrictedCellItem.create("unrestricted_item_cell_64k", 65536);
+        fluidCell1k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_1k", 1024);
+        fluidCell4k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_4k", 4096);
+        fluidCell16k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_16k", 16384);
+        fluidCell64k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_64k", 65536);
+        AEApi.instance().registries().cell().addCellHandler(new UnrestrictedCellHandler());
     }
 
     private static void registerVajraToolIdentities() {

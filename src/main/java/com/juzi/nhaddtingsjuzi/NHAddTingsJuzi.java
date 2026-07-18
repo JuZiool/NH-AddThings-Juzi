@@ -30,7 +30,7 @@ public class NHAddTingsJuzi
 {
     public static final String MODID = "nh_addtings_juzi";
     public static final String NAME = "NH-AddTings-Juzi";
-    public static final String VERSION = "0.1.5b";
+    public static final String VERSION = "0.1.6a";
 
     /** 本模组专属创造模式标签页 */
     public static CreativeTabs TAB_NH_ADD_TINGS = new CreativeTabs("nh_addtings_juzi") {
@@ -50,6 +50,15 @@ public class NHAddTingsJuzi
         public void displayAllReleventItems(List entries) {
             super.displayAllReleventItems(entries);
             CreativeTabEntries.append(entries, ModMachines.chargingStationStack);
+            CreativeTabEntries.append(entries, new ItemStack(ModItems.unrestrictedShell));
+            CreativeTabEntries.append(entries, new ItemStack(ModItems.itemCell1k));
+            CreativeTabEntries.append(entries, new ItemStack(ModItems.itemCell4k));
+            CreativeTabEntries.append(entries, new ItemStack(ModItems.itemCell16k));
+            CreativeTabEntries.append(entries, new ItemStack(ModItems.itemCell64k));
+            CreativeTabEntries.append(entries, new ItemStack(ModItems.fluidCell1k));
+            CreativeTabEntries.append(entries, new ItemStack(ModItems.fluidCell4k));
+            CreativeTabEntries.append(entries, new ItemStack(ModItems.fluidCell16k));
+            CreativeTabEntries.append(entries, new ItemStack(ModItems.fluidCell64k));
         }
     };
 

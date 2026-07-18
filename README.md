@@ -2,7 +2,7 @@
 
 一个面向 **Minecraft 1.7.10 / GregTech: New Horizons** 的扩展模组，为整合包补充飞行饰品、HV 电动工具与无线供电设备。
 
-当前版本：`0.1.5b`
+当前版本：`0.1.6a`
 
 ## 功能
 
@@ -99,7 +99,7 @@ Linux / macOS：
 构建产物位于：
 
 ```text
-build/libs/NH-AddTings-Juzi-0.1.5b.jar
+build/libs/NH-AddTings-Juzi-0.1.6a.jar
 ```
 
 运行单元测试：

@@ -34,9 +34,9 @@ public class ItemTieredVajra extends Item implements IElectricItem {
 
     private ItemTieredVajra(String unlocalizedName, VajraTier tier) {
         this.tier = tier;
-        setUnlocalizedName(unlocalizedName);
-        setMaxStackSize(1);
-        setNoRepair();
+        ((Item) this).setUnlocalizedName(unlocalizedName);
+        ((Item) this).setMaxStackSize(1);
+        ((Item) this).setNoRepair();
     }
 
     public static ItemTieredVajra createHv(String unlocalizedName) {
