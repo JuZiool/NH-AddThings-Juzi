@@ -88,8 +88,27 @@ public class ChargingStationLogicTest {
     public void safelyCapsVoltageForLowerTierTargets() {
         assertEquals(32L, ChargingStationLogic.transferVoltage(512L, 32L));
         assertEquals(128L, ChargingStationLogic.transferVoltage(512L, 128L));
-        assertEquals(512L, ChargingStationLogic.transferVoltage(512L, 2048L));
+        assertEquals(512L, ChargingStationLogic.transferVoltage(512L, 512L));
+        assertEquals(0L, ChargingStationLogic.transferVoltage(512L, 2048L));
         assertEquals(0L, ChargingStationLogic.transferVoltage(512L, 0L));
+    }
+
+    @Test
+    public void convertsRemainingEuIntoLowerVoltageAmperage() {
+        assertEquals(16L, ChargingStationLogic.targetAmperage(2048L, 2048L, 32768L));
+        assertEquals(64L, ChargingStationLogic.targetAmperage(2048L, 512L, 32768L));
+        assertEquals(256L, ChargingStationLogic.targetAmperage(2048L, 128L, 32768L));
+        assertEquals(1024L, ChargingStationLogic.targetAmperage(2048L, 32L, 32768L));
+    }
+
+    @Test
+    public void refusesUpscalingAndHandlesBudgetBoundaries() {
+        assertEquals(0L, ChargingStationLogic.targetAmperage(512L, 2048L, 32768L));
+        assertEquals(0L, ChargingStationLogic.targetAmperage(512L, 0L, 4096L));
+        assertEquals(0L, ChargingStationLogic.targetAmperage(512L, 512L, 511L));
+        assertEquals(1L, ChargingStationLogic.targetAmperage(512L, 512L, 512L));
+        assertEquals(2L, ChargingStationLogic.targetAmperage(512L, 512L, 1535L));
+        assertEquals(0L, ChargingStationLogic.targetAmperage(512L, 512L, 0L));
     }
 
     @Test
