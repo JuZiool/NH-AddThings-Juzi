@@ -3,6 +3,9 @@ package com.juzi.nhaddtingsjuzi.storage;
 import appeng.api.storage.ISaveProvider;
 import appeng.api.storage.data.IAEItemStack;
 import appeng.api.storage.data.IItemList;
+import appeng.api.networking.security.BaseActionSource;
+import appeng.api.networking.security.MachineSource;
+import appeng.api.networking.security.IActionHost;
 import appeng.util.item.AEItemStack;
 import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.item.ItemStack;
@@ -34,7 +37,6 @@ public final class CellStorageAccess {
             tag = new NBTTagCompound();
             cell.setTagCompound(tag);
         }
-
         UUID uuid = readUuid(tag);
         if (uuid == null) {
             uuid = UUID.randomUUID();
@@ -50,6 +52,10 @@ public final class CellStorageAccess {
     }
 
     public static void save(ItemStack cell, ISaveProvider provider, CellDataStorage storage) {
+        save(cell, provider, storage, null);
+    }
+
+    public static void save(ItemStack cell, ISaveProvider provider, CellDataStorage storage, BaseActionSource source) {
         if (cell == null || storage == null) return;
         NBTTagCompound tag = cell.getTagCompound();
         if (tag == null) {
@@ -57,9 +63,19 @@ public final class CellStorageAccess {
             cell.setTagCompound(tag);
         }
         updateStats(tag, storage);
-        World world = resolveWorld(provider);
+        World world = resolveWorld(provider, source);
         CellStorageManager manager = CellStorageManager.get(world);
         if (manager != null) manager.markDirty();
+    }
+
+    /**
+     * IO ports pass a null ISaveProvider and identify themselves through the action source.
+     * Mark that host dirty after changing the cell stack so its container can sync the new NBT.
+     */
+    public static void notifyMachineSave(BaseActionSource source) {
+        if (!(source instanceof MachineSource)) return;
+        IActionHost host = ((MachineSource) source).via;
+        if (host instanceof TileEntity) ((TileEntity) host).markDirty();
     }
 
     public static long getStoredItemCount(ItemStack cell) {
@@ -113,7 +129,15 @@ public final class CellStorageAccess {
     }
 
     private static World resolveWorld(ISaveProvider provider) {
+        return resolveWorld(provider, null);
+    }
+
+    private static World resolveWorld(ISaveProvider provider, BaseActionSource source) {
         if (provider instanceof TileEntity) return ((TileEntity) provider).getWorldObj();
+        if (source instanceof MachineSource && ((MachineSource) source).via instanceof TileEntity) {
+            return ((TileEntity) ((MachineSource) source).via).getWorldObj();
+        }
+        if (provider == null && source == null) return null;
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) return null;
         World world = DimensionManager.getWorld(0);
         if (world != null) return world;

@@ -39,9 +39,10 @@ public class UnrestrictedItemCellInventory implements IMEInventory<IAEItemStack>
         return appeng.api.AEApi.instance().storage().createItemList();
     }
 
-    private void save() {
-        if (storage != null) CellStorageAccess.save(cell, provider, storage);
+    private void save(BaseActionSource source) {
+        if (storage != null) CellStorageAccess.save(cell, provider, storage, source);
         if (provider != null) provider.saveChanges(this);
+        else CellStorageAccess.notifyMachineSave(source);
     }
 
     @Override public IAEItemStack injectItems(IAEItemStack input, Actionable mode, BaseActionSource src) {
@@ -53,14 +54,14 @@ public class UnrestrictedItemCellInventory implements IMEInventory<IAEItemStack>
             long available = getRemainingItemCount();
             long accepted = Math.min(input.getStackSize(), available);
             if (accepted <= 0) return input;
-            if (mode == Actionable.MODULATE) { data.insert(input, accepted); save(); }
+            if (mode == Actionable.MODULATE) { data.insert(input, accepted); save(src); }
             return accepted == input.getStackSize() ? null : copyWithSize(input, input.getStackSize() - accepted);
         }
         if (!canHoldNewItem()) return input;
         long available = getRemainingItemCount();
         long accepted = Math.min(input.getStackSize(), Math.max(0, available));
         if (accepted <= 0) return input;
-        if (mode == Actionable.MODULATE) { data.insert(input, accepted); save(); }
+        if (mode == Actionable.MODULATE) { data.insert(input, accepted); save(src); }
         return accepted == input.getStackSize() ? null : copyWithSize(input, input.getStackSize() - accepted);
     }
 
@@ -74,7 +75,7 @@ public class UnrestrictedItemCellInventory implements IMEInventory<IAEItemStack>
         if (stored == null) return null;
         long amount = Math.min(request.getStackSize(), stored.getStackSize());
         IAEItemStack result = copyWithSize(stored, amount);
-        if (mode == Actionable.MODULATE) { data.extract(request, amount); save(); }
+        if (mode == Actionable.MODULATE) { data.extract(request, amount); save(src); }
         return result;
     }
 

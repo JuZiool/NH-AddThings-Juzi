@@ -2,6 +2,7 @@ package com.juzi.nhaddtingsjuzi.storage;
 
 import appeng.api.storage.ISaveProvider;
 import appeng.api.storage.data.IAEFluidStack;
+import appeng.api.networking.security.BaseActionSource;
 import appeng.util.item.AEFluidStack;
 import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.item.ItemStack;
@@ -44,10 +45,18 @@ public final class CellFluidStorageAccess {
     }
 
     public static void save(ItemStack cell, ISaveProvider provider, CellFluidDataStorage storage) {
+        save(cell, provider, storage, null);
+    }
+
+    public static void save(ItemStack cell, ISaveProvider provider, CellFluidDataStorage storage, BaseActionSource source) {
         if (cell == null || storage == null) return;
         updateStats(getOrCreateTag(cell), storage);
-        CellStorageManager manager = CellStorageManager.get(resolveWorld(provider));
+        CellStorageManager manager = CellStorageManager.get(resolveWorld(provider, source));
         if (manager != null) manager.markDirty();
+    }
+
+    public static void notifyMachineSave(BaseActionSource source) {
+        CellStorageAccess.notifyMachineSave(source);
     }
 
     public static long getStoredFluidCount(ItemStack cell) {
@@ -109,7 +118,16 @@ public final class CellFluidStorageAccess {
     }
 
     private static World resolveWorld(ISaveProvider provider) {
+        return resolveWorld(provider, null);
+    }
+
+    private static World resolveWorld(ISaveProvider provider, BaseActionSource source) {
         if (provider instanceof TileEntity) return ((TileEntity) provider).getWorldObj();
+        if (source instanceof appeng.api.networking.security.MachineSource
+            && ((appeng.api.networking.security.MachineSource) source).via instanceof TileEntity) {
+            return ((TileEntity) ((appeng.api.networking.security.MachineSource) source).via).getWorldObj();
+        }
+        if (provider == null && source == null) return null;
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) return null;
         World world = DimensionManager.getWorld(0);
         if (world != null) return world;

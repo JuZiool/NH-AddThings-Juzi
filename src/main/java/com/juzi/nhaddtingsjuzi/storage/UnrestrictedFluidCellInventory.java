@@ -45,9 +45,10 @@ public class UnrestrictedFluidCellInventory implements IMEInventory<IAEFluidStac
         return data == null ? appeng.api.AEApi.instance().storage().createFluidList() : data.getFluids();
     }
 
-    private void save() {
-        if (storage != null && provider != null) CellFluidStorageAccess.save(cell, provider, storage);
+    private void save(BaseActionSource source) {
+        if (storage != null) CellFluidStorageAccess.save(cell, provider, storage, source);
         if (provider != null) provider.saveChanges(this);
+        else CellFluidStorageAccess.notifyMachineSave(source);
     }
 
     @Override public IAEFluidStack injectItems(IAEFluidStack input, Actionable mode, BaseActionSource src) {
@@ -57,12 +58,12 @@ public class UnrestrictedFluidCellInventory implements IMEInventory<IAEFluidStac
         if (stored != null) {
             long accepted = Math.min(input.getStackSize(), available);
             if (accepted <= 0) return input;
-            if (mode == Actionable.MODULATE) { storage().insert(input, accepted); save(); }
+            if (mode == Actionable.MODULATE) { storage().insert(input, accepted); save(src); }
             return accepted == input.getStackSize() ? null : copyWithSize(input, input.getStackSize() - accepted);
         }
         long accepted = Math.min(input.getStackSize(), available);
         if (accepted <= 0) return input;
-        if (mode == Actionable.MODULATE) { storage().insert(input, accepted); save(); }
+        if (mode == Actionable.MODULATE) { storage().insert(input, accepted); save(src); }
         return accepted == input.getStackSize() ? null : copyWithSize(input, input.getStackSize() - accepted);
     }
 
@@ -74,7 +75,7 @@ public class UnrestrictedFluidCellInventory implements IMEInventory<IAEFluidStac
         if (stored == null) return null;
         long amount = Math.min(request.getStackSize(), stored.getStackSize());
         IAEFluidStack result = copyWithSize(stored, amount);
-        if (mode == Actionable.MODULATE) { storage().extract(request, amount); save(); }
+        if (mode == Actionable.MODULATE) { storage().extract(request, amount); save(src); }
         return result;
     }
 
