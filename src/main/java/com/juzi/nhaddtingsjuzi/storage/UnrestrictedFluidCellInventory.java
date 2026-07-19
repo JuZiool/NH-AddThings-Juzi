@@ -20,7 +20,6 @@ public class UnrestrictedFluidCellInventory implements IMEInventory<IAEFluidStac
     private final ItemStack cell;
     private final ISaveProvider provider;
     private final UnrestrictedFluidCellItem type;
-    private IItemList<IAEFluidStack> fluids;
     private CellFluidDataStorage storage;
 
     public UnrestrictedFluidCellInventory(ItemStack cell, ISaveProvider provider, UnrestrictedFluidCellItem type) throws AppEngException {
@@ -30,21 +29,24 @@ public class UnrestrictedFluidCellInventory implements IMEInventory<IAEFluidStac
         this.type = type;
     }
 
+    UnrestrictedFluidCellInventory(ItemStack cell, ISaveProvider provider, UnrestrictedFluidCellItem type,
+        CellFluidDataStorage storage) throws AppEngException {
+        this(cell, provider, type);
+        this.storage = storage;
+    }
+
     public static UnrestrictedFluidCellInventory read(ItemStack stack, UnrestrictedFluidCellItem type) {
         try { return new UnrestrictedFluidCellInventory(stack, null, type); }
         catch (AppEngException e) { throw new IllegalArgumentException(e); }
     }
 
     private IItemList<IAEFluidStack> contents() {
-        if (fluids == null) {
-            CellFluidDataStorage data = storage();
-            fluids = data == null ? appeng.api.AEApi.instance().storage().createFluidList() : data.getFluids();
-        }
-        return fluids;
+        CellFluidDataStorage data = storage();
+        return data == null ? appeng.api.AEApi.instance().storage().createFluidList() : data.getFluids();
     }
 
     private void save() {
-        if (storage != null) CellFluidStorageAccess.save(cell, provider, storage);
+        if (storage != null && provider != null) CellFluidStorageAccess.save(cell, provider, storage);
         if (provider != null) provider.saveChanges(this);
     }
 

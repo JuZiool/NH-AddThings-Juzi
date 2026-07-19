@@ -37,7 +37,7 @@ public class UnrestrictedFluidCellItem extends Item implements IStorageFluidCell
     public void register() { GameRegistry.registerItem(this, id); }
     public int getCapacity() { return capacity; }
     @Override public long getBytes(ItemStack cellItem) { return capacity; }
-    @Override public int getBytesPerType(ItemStack cellItem) { return 8; }
+    @Override public int getBytesPerType(ItemStack cellItem) { return 0; }
     @Override public boolean isBlackListed(ItemStack cellItem, IAEFluidStack fluid) {
         return fluid == null || fluid.getFluid() == null;
     }

@@ -11,13 +11,47 @@ import java.util.UUID;
 
 /** One UUID-backed fluid collection used by an unrestricted fluid cell. */
 public final class CellFluidDataStorage {
+    interface FluidListFactory {
+        IItemList<IAEFluidStack> create();
+    }
+
+    interface FluidStackLoader {
+        IAEFluidStack load(NBTTagCompound tag);
+    }
+
+    private static final FluidListFactory DEFAULT_LIST_FACTORY = new FluidListFactory() {
+        @Override
+        public IItemList<IAEFluidStack> create() {
+            return AEApi.instance().storage().createFluidList();
+        }
+    };
+
+    private static final FluidStackLoader DEFAULT_STACK_LOADER = new FluidStackLoader() {
+        @Override
+        public IAEFluidStack load(NBTTagCompound tag) {
+            return AEFluidStack.loadFluidStackFromNBT(tag);
+        }
+    };
+
     private final UUID uuid;
+    private final FluidListFactory listFactory;
+    private final FluidStackLoader stackLoader;
     private IItemList<IAEFluidStack> fluids;
     private long storedFluidCount;
 
     public CellFluidDataStorage(UUID uuid) {
+        this(uuid, DEFAULT_LIST_FACTORY, DEFAULT_STACK_LOADER);
+    }
+
+    CellFluidDataStorage(UUID uuid, FluidListFactory listFactory) {
+        this(uuid, listFactory, DEFAULT_STACK_LOADER);
+    }
+
+    CellFluidDataStorage(UUID uuid, FluidListFactory listFactory, FluidStackLoader stackLoader) {
         this.uuid = uuid;
-        this.fluids = AEApi.instance().storage().createFluidList();
+        this.listFactory = listFactory == null ? DEFAULT_LIST_FACTORY : listFactory;
+        this.stackLoader = stackLoader == null ? DEFAULT_STACK_LOADER : stackLoader;
+        this.fluids = this.listFactory.create();
     }
 
     public UUID getUuid() {
@@ -71,11 +105,11 @@ public final class CellFluidDataStorage {
     }
 
     public void readFromNBT(NBTTagList list) {
-        fluids = AEApi.instance().storage().createFluidList();
+        fluids = listFactory.create();
         storedFluidCount = 0;
         if (list == null) return;
         for (int i = 0; i < list.tagCount(); i++) {
-            IAEFluidStack stack = AEFluidStack.loadFluidStackFromNBT(list.getCompoundTagAt(i));
+            IAEFluidStack stack = stackLoader.load(list.getCompoundTagAt(i));
             addImported(stack);
         }
     }
@@ -92,7 +126,7 @@ public final class CellFluidDataStorage {
     }
 
     private void removeEmpty(IAEFluidStack removed) {
-        IItemList<IAEFluidStack> remaining = AEApi.instance().storage().createFluidList();
+        IItemList<IAEFluidStack> remaining = listFactory.create();
         for (IAEFluidStack stack : fluids) {
             if (stack != removed && stack.getStackSize() > 0) remaining.add(stack);
         }
