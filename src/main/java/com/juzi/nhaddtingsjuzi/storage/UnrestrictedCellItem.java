@@ -96,21 +96,43 @@ public class UnrestrictedCellItem extends Item implements IStorageCell, CellInve
             return stack;
         }
 
+        // Keep the current cell in its slot while inserting the two outputs. Forge may
+        // write the returned stack back to that slot after this method returns.
+        giveOrDrop(player, new ItemStack(ModItems.unrestrictedShell));
+        giveOrDrop(player, UnrestrictedCellComponents.forCapacity(capacity));
         if (stack.stackSize <= 1) {
             player.inventory.setInventorySlotContents(player.inventory.currentItem, null);
             stack.stackSize = 0;
         } else {
             stack.stackSize--;
         }
-        giveOrDrop(player, new ItemStack(ModItems.unrestrictedShell));
-        giveOrDrop(player, UnrestrictedCellComponents.forCapacity(capacity));
         // Forge 1.7.10 reads stackSize from the returned stack without a null check.
         return stack;
     }
 
+    /** Matches AE2's block-right-click disassembly path, which returns a boolean. */
+    @Override
+    public boolean onItemUseFirst(ItemStack stack, EntityPlayer player, World world,
+        int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
+        if (!player.isSneaking() || world.isRemote || player.inventory.getCurrentItem() != stack
+            || !CellStorageAccess.isEmpty(stack, null)) {
+            return false;
+        }
+
+        player.inventory.setInventorySlotContents(player.inventory.currentItem, null);
+        giveOrDrop(player, new ItemStack(ModItems.unrestrictedShell));
+        giveOrDrop(player, UnrestrictedCellComponents.forCapacity(capacity));
+        if (player.inventoryContainer != null) {
+            player.inventoryContainer.detectAndSendChanges();
+        }
+        return true;
+    }
+
     private static void giveOrDrop(EntityPlayer player, ItemStack stack) {
-        if (!player.inventory.addItemStackToInventory(stack.copy())) {
-            player.entityDropItem(stack, 0.0F);
+        ItemStack remaining = stack.copy();
+        player.inventory.addItemStackToInventory(remaining);
+        if (remaining.stackSize > 0) {
+            player.entityDropItem(remaining, 0.0F);
         }
     }
 
