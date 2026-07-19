@@ -137,7 +137,6 @@ public final class CellStorageAccess {
         if (source instanceof MachineSource && ((MachineSource) source).via instanceof TileEntity) {
             return ((TileEntity) ((MachineSource) source).via).getWorldObj();
         }
-        if (provider == null && source == null) return null;
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) return null;
         World world = DimensionManager.getWorld(0);
         if (world != null) return world;

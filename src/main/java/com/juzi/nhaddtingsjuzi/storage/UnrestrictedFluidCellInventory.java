@@ -46,9 +46,11 @@ public class UnrestrictedFluidCellInventory implements IMEInventory<IAEFluidStac
     }
 
     private void save(BaseActionSource source) {
-        if (storage != null) CellFluidStorageAccess.save(cell, provider, storage, source);
+        if (storage != null && (provider != null || source != null)) {
+            CellFluidStorageAccess.save(cell, provider, storage, source);
+        }
         if (provider != null) provider.saveChanges(this);
-        else CellFluidStorageAccess.notifyMachineSave(source);
+        else if (source != null) CellFluidStorageAccess.notifyMachineSave(source);
     }
 
     @Override public IAEFluidStack injectItems(IAEFluidStack input, Actionable mode, BaseActionSource src) {

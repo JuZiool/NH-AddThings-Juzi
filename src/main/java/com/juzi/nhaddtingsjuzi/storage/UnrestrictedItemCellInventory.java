@@ -40,9 +40,11 @@ public class UnrestrictedItemCellInventory implements IMEInventory<IAEItemStack>
     }
 
     private void save(BaseActionSource source) {
-        if (storage != null) CellStorageAccess.save(cell, provider, storage, source);
+        if (storage != null && (provider != null || source != null)) {
+            CellStorageAccess.save(cell, provider, storage, source);
+        }
         if (provider != null) provider.saveChanges(this);
-        else CellStorageAccess.notifyMachineSave(source);
+        else if (source != null) CellStorageAccess.notifyMachineSave(source);
     }
 
     @Override public IAEItemStack injectItems(IAEItemStack input, Actionable mode, BaseActionSource src) {
