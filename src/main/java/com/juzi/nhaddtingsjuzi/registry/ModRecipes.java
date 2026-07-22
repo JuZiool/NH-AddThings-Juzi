@@ -2,6 +2,7 @@ package com.juzi.nhaddtingsjuzi.registry;
 
 import com.juzi.nhaddtingsjuzi.recipe.RecipeArcane;
 import com.juzi.nhaddtingsjuzi.recipe.RecipeChargingStation;
+import com.juzi.nhaddtingsjuzi.recipe.RecipeDualTerminal;
 import com.juzi.nhaddtingsjuzi.recipe.RecipeUnrestrictedItemCells;
 import com.juzi.nhaddtingsjuzi.recipe.RecipeUnrestrictedFluidCells;
 import com.juzi.nhaddtingsjuzi.recipe.RecipeUnrestrictedShell;
@@ -15,6 +16,7 @@ public final class ModRecipes {
         RecipeArcane.register();
         RecipeVajra.register();
         RecipeChargingStation.register();
+        RecipeDualTerminal.register();
         RecipeUnrestrictedShell.register();
         RecipeUnrestrictedItemCells.register();
         RecipeUnrestrictedFluidCells.register();
