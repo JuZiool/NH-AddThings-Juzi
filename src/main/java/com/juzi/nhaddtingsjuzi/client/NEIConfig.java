@@ -2,6 +2,8 @@ package com.juzi.nhaddtingsjuzi.client;
 
 import com.juzi.nhaddtingsjuzi.NHAddTingsJuzi;
 import com.juzi.nhaddtingsjuzi.registry.ModMachines;
+import com.juzi.nhaddtingsjuzi.terminal.client.DualTerminalCraftingTransferHandler;
+import com.juzi.nhaddtingsjuzi.terminal.client.GuiJuziDualTerminal;
 
 import codechicken.nei.api.API;
 import codechicken.nei.api.IConfigureNEI;
@@ -13,6 +15,14 @@ public class NEIConfig implements IConfigureNEI {
     public void loadConfig() {
         ItemStack chargingStationStack = ModMachines.chargingStationStack.copy();
         API.addItemVariant(chargingStationStack.getItem(), chargingStationStack);
+        API.registerGuiOverlayHandler(
+                GuiJuziDualTerminal.class,
+                DualTerminalCraftingTransferHandler.INSTANCE,
+                "crafting");
+        API.registerGuiOverlayHandler(
+                GuiJuziDualTerminal.class,
+                DualTerminalCraftingTransferHandler.INSTANCE,
+                "crafting2x2");
         System.out.println("[NH-AddTings-Juzi] Added Charging Station to NEI item list");
     }
 

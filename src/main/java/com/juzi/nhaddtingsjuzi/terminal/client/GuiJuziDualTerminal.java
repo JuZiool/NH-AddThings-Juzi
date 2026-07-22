@@ -10,7 +10,6 @@ import com.juzi.nhaddtingsjuzi.terminal.parts.PartDualTerminal;
 
 import appeng.api.storage.data.IAEFluidStack;
 import appeng.api.storage.data.IAEItemStack;
-import appeng.core.localization.GuiColors;
 import appeng.core.localization.GuiText;
 import appeng.util.item.AEItemStack;
 import cpw.mods.fml.relauncher.Side;
@@ -48,13 +47,7 @@ public final class GuiJuziDualTerminal extends GuiCraftingTerminal {
 
     @Override
     public void drawFG(final int offsetX, final int offsetY, final int mouseX, final int mouseY) {
-        // Middle label: crafting section (same place as vanilla Crafting Terminal).
-        this.fontRendererObj.drawString(
-                GuiText.CraftingTerminal.getLocal(),
-                8,
-                this.ySize - 96 + 1 - this.getReservedSpace(),
-                GuiColors.CraftingTerminalTitle.getColor());
-        // Top title: dual terminal name (replaces generic "Terminal").
+        // Only the top title; leave the crafting-section area unlabeled.
         String title = StatCollector.translateToLocal("nh_addtings_juzi.dual_terminal.title");
         if (title == null || title.startsWith("nh_addtings_juzi.")) {
             title = GuiText.Terminal.getLocal();

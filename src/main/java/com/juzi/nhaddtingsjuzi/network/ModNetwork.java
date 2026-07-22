@@ -3,6 +3,8 @@ package com.juzi.nhaddtingsjuzi.network;
 import java.util.List;
 
 import com.juzi.nhaddtingsjuzi.NHAddTingsJuzi;
+import com.juzi.nhaddtingsjuzi.terminal.network.DualTerminalRecipeHandler;
+import com.juzi.nhaddtingsjuzi.terminal.network.DualTerminalRecipeMessage;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -15,6 +17,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.item.ElectricItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 
 public final class ModNetwork {
 
@@ -30,6 +33,8 @@ public final class ModNetwork {
         }
         CHANNEL.registerMessage(ServerMessageHandler.class,
                 HeldItemChargeMessage.class, 0, Side.SERVER);
+        CHANNEL.registerMessage(DualTerminalRecipeHandler.class,
+                DualTerminalRecipeMessage.class, 1, Side.SERVER);
         registered = true;
     }
 
@@ -41,6 +46,11 @@ public final class ModNetwork {
 
     static SimpleNetworkWrapper getChannel() {
         return CHANNEL;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static void sendDualTerminalRecipe(NBTTagCompound ingredients) {
+        CHANNEL.sendToServer(new DualTerminalRecipeMessage(ingredients));
     }
 
     public static void syncHeldItem(EntityPlayerMP player, int inventorySlot,
