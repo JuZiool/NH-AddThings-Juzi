@@ -69,10 +69,27 @@ public class UnrestrictedCellItem extends Item implements IStorageCell, CellInve
     @Override public double getIdleDrain() { return 1.0D; }
     @Override public double getIdleDrain(ItemStack is) { return getIdleDrain(); }
     @Override public boolean isEditable(ItemStack is) { return true; }
-    @Override public IInventory getUpgradesInventory(ItemStack is) { return new appeng.items.contents.CellUpgrades(is, 0); }
-    @Override public IInventory getConfigInventory(ItemStack is) { return new appeng.items.contents.CellConfig(is); }
-    @Override public FuzzyMode getFuzzyMode(ItemStack is) { return FuzzyMode.IGNORE_ALL; }
-    @Override public void setFuzzyMode(ItemStack is, FuzzyMode mode) { }
+
+    /** 2 slots: fuzzy / inverter / ore-filter / sticky (same capacity as AE2Things infinity cells). */
+    @Override
+    public IInventory getUpgradesInventory(ItemStack is) {
+        return new appeng.items.contents.CellUpgrades(is, 2);
+    }
+
+    @Override
+    public IInventory getConfigInventory(ItemStack is) {
+        return new appeng.items.contents.CellConfig(is);
+    }
+
+    @Override
+    public FuzzyMode getFuzzyMode(ItemStack is) {
+        return FuzzyMode.fromItemStack(is);
+    }
+
+    @Override
+    public void setFuzzyMode(ItemStack is, FuzzyMode mode) {
+        appeng.util.Platform.openNbtData(is).setString("FuzzyMode", mode.name());
+    }
 
     public IMEInventoryHandler<IAEItemStack> getInventoryHandler(ItemStack is, ISaveProvider provider, EntityPlayer player)
         throws AppEngException {
@@ -85,7 +102,15 @@ public class UnrestrictedCellItem extends Item implements IStorageCell, CellInve
         return getInventoryHandler(is, provider, player);
     }
 
-    @Override public String getOreFilter(ItemStack is) { return ""; }
+    @Override
+    public String getOreFilter(ItemStack is) {
+        return appeng.util.Platform.openNbtData(is).getString("OreFilter");
+    }
+
+    public void setOreFilter(ItemStack is, String filter) {
+        appeng.util.Platform.openNbtData(is).setString("OreFilter", filter == null ? "" : filter);
+    }
+
     public StorageChannel getChannel() { return StorageChannel.ITEMS; }
 
     @Override
@@ -141,8 +166,11 @@ public class UnrestrictedCellItem extends Item implements IStorageCell, CellInve
     @Override
     public void addInformation(ItemStack stack, EntityPlayer player, List lines, boolean advanced) {
         super.addInformation(stack, player, lines, advanced);
-        lines.add(StatCollector.translateToLocalFormatted("nh_addtings_juzi.cell.types", CellStorageAccess.getStoredItemTypes(stack)));
-        lines.add(StatCollector.translateToLocalFormatted("nh_addtings_juzi.cell.space", CellStorageAccess.getUsedBytes(stack), capacity));
+        lines.add(StatCollector.translateToLocalFormatted(
+                "nh_addtings_juzi.cell.types", CellStorageAccess.getStoredItemTypes(stack)));
+        lines.add(StatCollector.translateToLocalFormatted(
+                "nh_addtings_juzi.cell.space", CellStorageAccess.getUsedBytes(stack), capacity));
+        UnrestrictedCellPartitionTooltip.appendItemPartition(stack, this, lines);
     }
 
     public static UnrestrictedCellItem create(String id, int capacity) {

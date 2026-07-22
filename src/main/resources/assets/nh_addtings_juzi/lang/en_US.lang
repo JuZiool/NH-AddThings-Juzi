@@ -29,3 +29,4 @@ item.unrestricted_fluid_cell_16k.name=16k Unrestricted Fluid Cell
 item.unrestricted_fluid_cell_64k.name=64k Unrestricted Fluid Cell
 nh_addtings_juzi.cell.types=Used types: %s
 nh_addtings_juzi.cell.space=Used space: %s / %s bytes
+nh_addtings_juzi.cell.partition.shift=Hold Shift to list partition filters

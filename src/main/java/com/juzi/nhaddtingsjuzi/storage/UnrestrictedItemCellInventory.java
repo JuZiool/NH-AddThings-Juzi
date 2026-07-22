@@ -86,9 +86,10 @@ public class UnrestrictedItemCellInventory implements IMEInventory<IAEItemStack>
     @Override public StorageChannel getChannel() { return StorageChannel.ITEMS; }
     @Override public ItemStack getItemStack() { return cell; }
     @Override public double getIdleDrain() { return type.getIdleDrain(); }
-    @Override public FuzzyMode getFuzzyMode() { return FuzzyMode.IGNORE_ALL; }
+    @Override public FuzzyMode getFuzzyMode() { return type.getFuzzyMode(cell); }
     @Override public IInventory getConfigInventory() { return type.getConfigInventory(cell); }
     @Override public IInventory getUpgradesInventory() { return type.getUpgradesInventory(cell); }
+    @Override public String getOreFilter() { return type.getOreFilter(cell); }
     /** GTO-style cells charge capacity by total item amount and never by item type. */
     @Override public int getBytesPerType() { return 0; }
     @Override public boolean canHoldNewItem() { return getRemainingItemCount() > 0; }
@@ -112,7 +113,6 @@ public class UnrestrictedItemCellInventory implements IMEInventory<IAEItemStack>
         if (getStoredItemCount() == 0) return 1;
         return canHoldNewItem() ? 2 : (getRemainingItemCount() > 0 ? 3 : 4);
     }
-    @Override public String getOreFilter() { return ""; }
 
     private CellDataStorage storage() {
         if (storage == null) storage = CellStorageAccess.get(cell, provider);

@@ -46,12 +46,37 @@ public class UnrestrictedFluidCellItem extends Item implements IStorageFluidCell
     @Override public double getIdleDrain(ItemStack is) { return 1.0D; }
     @Override public int getTotalTypes(ItemStack cellItem) { return Integer.MAX_VALUE; }
     @Override public boolean isEditable(ItemStack is) { return true; }
-    @Override public IInventory getUpgradesInventory(ItemStack is) { return new appeng.items.contents.CellUpgrades(is, 0); }
-    @Override public IInventory getConfigInventory(ItemStack is) { return new appeng.items.contents.CellConfig(is); }
-    @Override public FuzzyMode getFuzzyMode(ItemStack is) { return FuzzyMode.IGNORE_ALL; }
-    @Override public void setFuzzyMode(ItemStack is, FuzzyMode mode) { }
+
+    /** ae2fc fluid cells use inverter + sticky; no fuzzy/ore-filter for fluids. */
+    @Override
+    public IInventory getUpgradesInventory(ItemStack is) {
+        return new appeng.items.contents.CellUpgrades(is, 2);
+    }
+
+    @Override
+    public IInventory getConfigInventory(ItemStack is) {
+        return new appeng.items.contents.CellConfig(is);
+    }
+
+    @Override
+    public FuzzyMode getFuzzyMode(ItemStack is) {
+        String fz = appeng.util.Platform.openNbtData(is).getString("FuzzyMode");
+        try {
+            return FuzzyMode.valueOf(fz);
+        } catch (Throwable t) {
+            return FuzzyMode.IGNORE_ALL;
+        }
+    }
+
+    @Override
+    public void setFuzzyMode(ItemStack is, FuzzyMode mode) {
+        appeng.util.Platform.openNbtData(is).setString("FuzzyMode", mode.name());
+    }
+
     public IMEInventoryHandler<IAEFluidStack> getInventoryHandler(ItemStack is, ISaveProvider provider, EntityPlayer player)
-        throws AppEngException { return new UnrestrictedFluidCellHandler(new UnrestrictedFluidCellInventory(is, provider, this)); }
+        throws AppEngException {
+        return new UnrestrictedFluidCellHandler(new UnrestrictedFluidCellInventory(is, provider, this));
+    }
 
     @Override
     public IMEInventoryHandler<?> getCellInventory(ItemStack is, ISaveProvider provider, EntityPlayer player)
@@ -112,9 +137,11 @@ public class UnrestrictedFluidCellItem extends Item implements IStorageFluidCell
     @Override
     public void addInformation(ItemStack stack, EntityPlayer player, List lines, boolean advanced) {
         super.addInformation(stack, player, lines, advanced);
-        UnrestrictedFluidCellInventory inv = UnrestrictedFluidCellInventory.read(stack, this);
-        lines.add(StatCollector.translateToLocalFormatted("nh_addtings_juzi.cell.types", CellFluidStorageAccess.getStoredFluidTypes(stack)));
-        lines.add(StatCollector.translateToLocalFormatted("nh_addtings_juzi.cell.space", CellFluidStorageAccess.getUsedBytes(stack), capacity));
+        lines.add(StatCollector.translateToLocalFormatted(
+                "nh_addtings_juzi.cell.types", CellFluidStorageAccess.getStoredFluidTypes(stack)));
+        lines.add(StatCollector.translateToLocalFormatted(
+                "nh_addtings_juzi.cell.space", CellFluidStorageAccess.getUsedBytes(stack), capacity));
+        UnrestrictedCellPartitionTooltip.appendFluidPartition(stack, this, lines);
     }
 
     public static UnrestrictedFluidCellItem create(String id, int capacity) {

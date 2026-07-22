@@ -29,3 +29,4 @@ item.unrestricted_fluid_cell_16k.name=16k 无限制流体磁盘
 item.unrestricted_fluid_cell_64k.name=64k 无限制流体磁盘
 nh_addtings_juzi.cell.types=已用种类：%s
 nh_addtings_juzi.cell.space=已用空间：%s / %s bytes
+nh_addtings_juzi.cell.partition.shift=按住 Shift 查看分区过滤列表
