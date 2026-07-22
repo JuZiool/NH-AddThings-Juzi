@@ -3,6 +3,9 @@ package com.juzi.nhaddtingsjuzi;
 import com.juzi.nhaddtingsjuzi.client.ClientEventHandler;
 import com.juzi.nhaddtingsjuzi.network.ModNetwork;
 import com.juzi.nhaddtingsjuzi.network.ModNetworkClient;
+import com.juzi.nhaddtingsjuzi.terminal.network.DualTerminalGuiHandler;
+
+import cpw.mods.fml.common.network.NetworkRegistry;
 import com.juzi.nhaddtingsjuzi.registry.ModItems;
 import com.juzi.nhaddtingsjuzi.registry.ModMachines;
 import com.juzi.nhaddtingsjuzi.registry.ModRecipes;
@@ -25,12 +28,15 @@ import cpw.mods.fml.relauncher.SideOnly;
         name = NHAddTingsJuzi.NAME,
         version = NHAddTingsJuzi.VERSION,
         dependencies = "required-after:gregtech;required-after:IC2;"
-                + "required-after:appliedenergistics2;required-after:ae2fc")
+                + "required-after:appliedenergistics2;required-after:ae2fc;required-after:ae2thing")
 public class NHAddTingsJuzi
 {
+    @Mod.Instance(NHAddTingsJuzi.MODID)
+    public static NHAddTingsJuzi INSTANCE;
+
     public static final String MODID = "nh_addtings_juzi";
     public static final String NAME = "NH-AddTings-Juzi";
-    public static final String VERSION = "0.1.7";
+    public static final String VERSION = "0.1.8a";
 
     /** 本模组专属创造模式标签页 */
     public static CreativeTabs TAB_NH_ADD_TINGS = new CreativeTabs("nh_addtings_juzi") {
@@ -58,6 +64,7 @@ public class NHAddTingsJuzi
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         ModNetwork.register();
+        NetworkRegistry.INSTANCE.registerGuiHandler(this, DualTerminalGuiHandler.INSTANCE);
         if (event.getSide() == Side.CLIENT) {
             ModNetworkClient.register();
         }

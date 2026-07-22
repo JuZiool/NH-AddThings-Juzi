@@ -32,3 +32,6 @@ gradle/wrapper/gradle-wrapper.jar
 
 # Reference projects
 参考项目/
+
+# Local agent workspace
+.claude/

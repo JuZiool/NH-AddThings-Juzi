@@ -3,7 +3,6 @@ package com.juzi.nhaddtingsjuzi.network;
 import java.util.List;
 
 import com.juzi.nhaddtingsjuzi.NHAddTingsJuzi;
-
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;

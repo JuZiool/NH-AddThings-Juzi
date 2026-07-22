@@ -2,7 +2,7 @@
 
 一个面向 **Minecraft 1.7.10 / GregTech: New Horizons** 的扩展模组，为整合包补充飞行饰品、HV 电动工具、无线供电设备与无限制 AE 存储单元。
 
-当前版本：`0.1.7`
+当前版本：`0.1.8a`
 
 ## 功能
 
@@ -50,6 +50,12 @@
 - 在充电站界面使用 Shift+左键转移玩家背包物品时，充电站电路槽不会参与转移，避免物品消失。
 - 在组装机中使用 `1× EV 机器外壳`、`2× 精英电路`、`16× HV 发射器`、`8× HV 传感器` 和 `1× LV 力场发生器` 合成；耗时 30 秒，功率 `480 EU/t`。
 
+### 物品/流体双用终端
+
+- 复用 AE2Things 合成终端 UI，保留搜索、排序、3x3 合成区与 NEI 交互。
+- AE 物品与 AE2FC 流体进入同一列表，共同参与当前名称、数量、MOD 及正/倒序排序。
+- 物品使用 AE2 原生存取操作；流体使用 AE2Things 的流体容器操作逻辑。
+
 ### 无限制 AE 存储单元
 
 - 提供 1k / 4k / 16k / 64k 物品盘与流体盘，以及共用「无限制外壳」合成组件。
@@ -68,6 +74,7 @@
 - IndustrialCraft 2 Experimental
 - Applied Energistics 2（GTNH）
 - AE2 Fluid Crafting（ae2fc，流体盘）
+- AE2Things（ae2thing，混合终端 UI 与流体交互）
 - Baubles Expanded
 - Thaumcraft 4
 - Thaumic Exploration
@@ -109,7 +116,7 @@ Linux / macOS：
 构建产物位于：
 
 ```text
-build/libs/NH-AddTings-Juzi-0.1.7.jar
+build/libs/NH-AddTings-Juzi-0.1.8a.jar
 ```
 
 运行单元测试：

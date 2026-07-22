@@ -7,6 +7,7 @@ import com.juzi.nhaddtingsjuzi.item.ItemUnrestrictedShell;
 import com.juzi.nhaddtingsjuzi.storage.UnrestrictedCellHandler;
 import com.juzi.nhaddtingsjuzi.storage.UnrestrictedCellItem;
 import com.juzi.nhaddtingsjuzi.storage.UnrestrictedFluidCellItem;
+import com.juzi.nhaddtingsjuzi.terminal.item.ItemPartDualTerminal;
 
 import appeng.api.AEApi;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -31,6 +32,7 @@ public final class ModItems {
     public static UnrestrictedFluidCellItem fluidCell4k;
     public static UnrestrictedFluidCellItem fluidCell16k;
     public static UnrestrictedFluidCellItem fluidCell64k;
+    public static ItemPartDualTerminal dualTerminal;
 
     private ModItems() {}
 
@@ -53,6 +55,7 @@ public final class ModItems {
         fluidCell4k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_4k", 4096);
         fluidCell16k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_16k", 16384);
         fluidCell64k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_64k", 65536);
+        dualTerminal = new ItemPartDualTerminal().register();
         AEApi.instance().registries().cell().addCellHandler(new UnrestrictedCellHandler());
     }
 
