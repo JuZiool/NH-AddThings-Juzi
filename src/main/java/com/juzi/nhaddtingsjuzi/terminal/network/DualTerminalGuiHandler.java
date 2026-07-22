@@ -2,6 +2,9 @@ package com.juzi.nhaddtingsjuzi.terminal.network;
 
 import java.lang.reflect.Constructor;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.asdflj.ae2thing.client.gui.container.ContainerJuziDualTerminal;
 import com.juzi.nhaddtingsjuzi.terminal.parts.PartDualTerminal;
 
@@ -17,6 +20,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 /** Opens the interactive mixed item/fluid crafting terminal. */
 public final class DualTerminalGuiHandler implements IGuiHandler {
+    private static final Logger LOG = LogManager.getLogger("NH-AddTings-Juzi");
     private static final int GUI_BASE = 0x4E40;
     public static final DualTerminalGuiHandler INSTANCE = new DualTerminalGuiHandler();
     private static final String CLIENT_GUI_CLASS =
@@ -54,7 +58,9 @@ public final class DualTerminalGuiHandler implements IGuiHandler {
             Constructor<?> constructor = guiClass.getConstructor(
                     net.minecraft.entity.player.InventoryPlayer.class, PartDualTerminal.class);
             return constructor.newInstance(player.inventory, part);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            LOG.error("Failed to open dual terminal GUI for side {} at {},{},{}",
+                    side, x, y, z, e);
             return null;
         }
     }

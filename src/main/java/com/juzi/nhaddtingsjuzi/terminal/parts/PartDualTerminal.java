@@ -1,5 +1,10 @@
 package com.juzi.nhaddtingsjuzi.terminal.parts;
 
+import appeng.api.config.SecurityPermissions;
+import appeng.api.networking.IGrid;
+import appeng.api.networking.IGridNode;
+import appeng.api.networking.security.ISecurityGrid;
+import appeng.api.util.DimensionalCoord;
 import appeng.client.texture.CableBusTextures;
 import appeng.parts.reporting.PartCraftingTerminal;
 import appeng.util.Platform;
@@ -64,10 +69,33 @@ public class PartDualTerminal extends PartCraftingTerminal {
         if (tile == null || getHost() == null || getHost().getPart(getSide()) != this) {
             return false;
         }
+        if (!canPlayerOpen(player, tile)) {
+            return false;
+        }
 
         FMLNetworkHandler.openGui(player, NHAddTingsJuzi.INSTANCE,
                 DualTerminalGuiHandler.guiId(getSide()), tile.getWorldObj(),
                 tile.xCoord, tile.yCoord, tile.zCoord);
         return true;
+    }
+
+    /**
+     * Mirror AE GuiBridge open checks: block interaction + CRAFT security
+     * (same required permission as GUI_CRAFTING_TERMINAL).
+     */
+    private boolean canPlayerOpen(EntityPlayer player, TileEntity tile) {
+        if (!Platform.hasPermissions(new DimensionalCoord(tile), player)) {
+            return false;
+        }
+        IGridNode node = getActionableNode();
+        if (node == null) {
+            return false;
+        }
+        IGrid grid = node.getGrid();
+        if (grid == null) {
+            return false;
+        }
+        ISecurityGrid security = grid.getCache(ISecurityGrid.class);
+        return security != null && security.hasPermission(player, SecurityPermissions.CRAFT);
     }
 }

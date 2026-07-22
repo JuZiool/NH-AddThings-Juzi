@@ -15,6 +15,6 @@ public class NEIConfigTest {
 
         assertTrue(config instanceof IConfigureNEI);
         assertEquals("NH-AddTings-Juzi", config.getName());
-        assertEquals("0.1.8a", config.getVersion());
+        assertEquals("0.1.8b", config.getVersion());
     }
 }
