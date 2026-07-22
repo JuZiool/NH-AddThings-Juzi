@@ -8,6 +8,10 @@ public final class VajraLogic {
         return charge >= operationCost;
     }
 
+    static boolean canUseWrench(double charge, int operationCost, boolean creative) {
+        return creative || hasOperationEnergy(charge, operationCost);
+    }
+
     static float miningSpeed(double charge, VajraTier tier) {
         return canHarvest(charge, tier) ? tier.getMiningSpeed() : 0.0F;
     }
@@ -20,16 +24,8 @@ public final class VajraLogic {
         return Math.max(0.0D, Math.min(charge, tier.getMaxCharge()));
     }
 
-    static boolean isMineableBlock(boolean gregTechMachine,
-                                   boolean appropriateTool,
-                                   boolean appropriateMaterial) {
-        return isMineableBlock(gregTechMachine, appropriateTool, appropriateMaterial, false);
-    }
-
-    static boolean isMineableBlock(boolean gregTechMachine,
-                                   boolean appropriateTool,
-                                   boolean appropriateMaterial,
-                                   boolean approvedCommonMaterial) {
+    /** HV vajra harvests any block when it has enough charge; material checks are unused. */
+    static boolean isMineableBlock() {
         return true;
     }
 
@@ -37,8 +33,9 @@ public final class VajraLogic {
         return cable && !clientSide;
     }
 
-    static boolean shouldBypassSneakUse(boolean gregTechPipe) {
-        return gregTechPipe;
+    /** AE quartz wrench always bypasses sneak-use; vajra matches that contract. */
+    static boolean shouldBypassSneakUse(boolean always) {
+        return always;
     }
 
     public static boolean shouldSuppressToolMessage(boolean holdingVajra,

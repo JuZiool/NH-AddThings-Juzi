@@ -11,8 +11,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
-import org.lwjgl.input.Keyboard;
 import net.minecraft.util.IIcon;
+import net.minecraft.util.StatCollector;
+import org.lwjgl.input.Keyboard;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -105,10 +106,13 @@ public class ItemFlightCharm extends Item implements IBaubleExpanded {
     public void addInformation(ItemStack stack, EntityPlayer player,
                                List list, boolean advanced) {
         if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) {
-            list.add(EnumChatFormatting.GRAY + "佩戴后获得创造飞行能力");
-            list.add(EnumChatFormatting.GRAY + "每累计飞行 30 秒消耗 1 格饱食度");
+            list.add(EnumChatFormatting.GRAY
+                    + StatCollector.translateToLocal("item.flight_charm.tooltip.detail1"));
+            list.add(EnumChatFormatting.GRAY
+                    + StatCollector.translateToLocal("item.flight_charm.tooltip.detail2"));
         } else {
-            list.add(EnumChatFormatting.GRAY + "按住 Shift 查看详情");
+            list.add(EnumChatFormatting.GRAY
+                    + StatCollector.translateToLocal("item.flight_charm.tooltip.shift"));
         }
     }
 

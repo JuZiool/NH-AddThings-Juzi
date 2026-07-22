@@ -28,7 +28,7 @@ repositories {
     }
 }
 
-version = "0.1.6d"
+version = "0.1.7"
 group= "com.juzi" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "NH-AddTings-Juzi"
 

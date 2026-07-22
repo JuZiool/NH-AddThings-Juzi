@@ -49,11 +49,12 @@ public class UnrestrictedCellItem extends Item implements IStorageCell, CellInve
     @Override
     public long getBytesLong(ItemStack cellItem) { return capacity; }
 
+    /** GTO-style: capacity is charged by item count only, never by type. */
     @Override
-    public int BytePerType(ItemStack cellItem) { return 8; }
+    public int BytePerType(ItemStack cellItem) { return 0; }
 
     @Override
-    public int getBytesPerType(ItemStack cellItem) { return 8; }
+    public int getBytesPerType(ItemStack cellItem) { return 0; }
 
     @Override
     public int getTotalTypes(ItemStack cellItem) { return Integer.MAX_VALUE; }

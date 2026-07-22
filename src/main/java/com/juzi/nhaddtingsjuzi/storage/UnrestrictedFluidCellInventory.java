@@ -55,17 +55,13 @@ public class UnrestrictedFluidCellInventory implements IMEInventory<IAEFluidStac
 
     @Override public IAEFluidStack injectItems(IAEFluidStack input, Actionable mode, BaseActionSource src) {
         if (input == null || input.getStackSize() <= 0 || type.isBlackListed(cell, input)) return input;
-        IAEFluidStack stored = contents().findPrecise(input);
+        CellFluidDataStorage data = storage();
+        if (data == null) return input;
+        IAEFluidStack stored = data.getFluids().findPrecise(input);
         long available = getRemainingFluidCount();
-        if (stored != null) {
-            long accepted = Math.min(input.getStackSize(), available);
-            if (accepted <= 0) return input;
-            if (mode == Actionable.MODULATE) { storage().insert(input, accepted); save(src); }
-            return accepted == input.getStackSize() ? null : copyWithSize(input, input.getStackSize() - accepted);
-        }
         long accepted = Math.min(input.getStackSize(), available);
         if (accepted <= 0) return input;
-        if (mode == Actionable.MODULATE) { storage().insert(input, accepted); save(src); }
+        if (mode == Actionable.MODULATE) { data.insert(input, accepted); save(src); }
         return accepted == input.getStackSize() ? null : copyWithSize(input, input.getStackSize() - accepted);
     }
 
@@ -73,11 +69,13 @@ public class UnrestrictedFluidCellInventory implements IMEInventory<IAEFluidStac
 
     @Override public IAEFluidStack extractItems(IAEFluidStack request, Actionable mode, BaseActionSource src) {
         if (request == null || request.getStackSize() <= 0) return null;
-        IAEFluidStack stored = contents().findPrecise(request);
+        CellFluidDataStorage data = storage();
+        if (data == null) return null;
+        IAEFluidStack stored = data.getFluids().findPrecise(request);
         if (stored == null) return null;
         long amount = Math.min(request.getStackSize(), stored.getStackSize());
         IAEFluidStack result = copyWithSize(stored, amount);
-        if (mode == Actionable.MODULATE) { storage().extract(request, amount); save(src); }
+        if (mode == Actionable.MODULATE) { data.extract(request, amount); save(src); }
         return result;
     }
 

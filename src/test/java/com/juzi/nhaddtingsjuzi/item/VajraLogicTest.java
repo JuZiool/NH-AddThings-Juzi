@@ -29,6 +29,13 @@ public class VajraLogicTest {
     }
 
     @Test
+    public void allowsAeWrenchUseOnlyWithOneFullOperationOfCharge() {
+        assertFalse(VajraLogic.canUseWrench(3332.0D, 3333, false));
+        assertTrue(VajraLogic.canUseWrench(3333.0D, 3333, false));
+        assertTrue(VajraLogic.canUseWrench(0.0D, 3333, true));
+    }
+
+    @Test
     public void capsTransferredBatteryCharge() {
         assertEquals(0.0D, VajraLogic.transferredCharge(-1.0D, VajraTier.HV), 0.0D);
         assertEquals(7500000.0D, VajraLogic.transferredCharge(7500000.0D, VajraTier.HV), 0.0D);
@@ -36,18 +43,8 @@ public class VajraLogicTest {
     }
 
     @Test
-    public void minesGregTechMachinesEvenWithTheirCustomMaterial() {
-        assertTrue(VajraLogic.isMineableBlock(false, false, false));
-        assertTrue(VajraLogic.isMineableBlock(true, false, false));
-        assertTrue(VajraLogic.isMineableBlock(false, true, false));
-        assertTrue(VajraLogic.isMineableBlock(false, false, true));
-    }
-
-    @Test
-    public void minesExplicitlyApprovedCommonMaterials() {
-        assertTrue(VajraLogic.isMineableBlock(false, false, false, false));
-        assertTrue(VajraLogic.isMineableBlock(false, false, false, true));
-        assertTrue(VajraLogic.isMineableBlock(true, false, false, false));
+    public void minesAnyBlockWhenCharged() {
+        assertTrue(VajraLogic.isMineableBlock());
     }
 
     @Test
@@ -58,9 +55,9 @@ public class VajraLogicTest {
     }
 
     @Test
-    public void bypassesSneakUseForGregTechPipes() {
-        assertFalse(VajraLogic.shouldBypassSneakUse(false));
+    public void bypassesSneakUseLikeAeWrench() {
         assertTrue(VajraLogic.shouldBypassSneakUse(true));
+        assertFalse(VajraLogic.shouldBypassSneakUse(false));
     }
 
     @Test

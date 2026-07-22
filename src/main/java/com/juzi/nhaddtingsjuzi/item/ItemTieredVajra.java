@@ -4,8 +4,14 @@ import java.util.List;
 
 import ic2.api.item.ElectricItem;
 import ic2.api.item.IElectricItem;
+import appeng.api.implementations.items.IAEWrench;
+import appeng.api.parts.IPartHost;
+import appeng.block.AEBaseTileBlock;
+import appeng.parts.PartPlacement;
+import appeng.parts.PartPlacement.PlaceType;
+import appeng.tile.networking.TileCableBus;
+import appeng.util.Platform;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
@@ -20,12 +26,12 @@ import net.minecraft.world.World;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import gregtech.api.GregTechAPI;
-import gregtech.api.util.GTToolHarvestHelper;
 import gregtech.api.util.GTUtility;
 import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
-public class ItemTieredVajra extends Item implements IElectricItem {
+public class ItemTieredVajra extends Item implements IElectricItem, IAEWrench {
 
     private final VajraTier tier;
 
@@ -64,6 +70,13 @@ public class ItemTieredVajra extends Item implements IElectricItem {
 
     private boolean hasOperationEnergy(ItemStack stack) {
         return VajraLogic.hasOperationEnergy(getCharge(stack), tier.getOperationCost());
+    }
+
+    private boolean canUseWrench(ItemStack stack, EntityPlayer player) {
+        return VajraLogic.canUseWrench(
+                getCharge(stack),
+                tier.getOperationCost(),
+                player != null && player.capabilities.isCreativeMode);
     }
 
     @Override
@@ -108,50 +121,10 @@ public class ItemTieredVajra extends Item implements IElectricItem {
 
     @Override
     public float getDigSpeed(ItemStack stack, Block block, int metadata) {
-        if (!hasOperationEnergy(stack) || !isMineableBlock(block, metadata)) {
+        if (!hasOperationEnergy(stack) || !VajraLogic.isMineableBlock()) {
             return 0.0F;
         }
         return tier.getMiningSpeed();
-    }
-
-    private boolean isMineableBlock(Block block, int metadata) {
-        return VajraLogic.isMineableBlock(
-                GregTechAPI.isMachineBlock(block, metadata),
-                GTToolHarvestHelper.isAppropriateTool(
-                        block, metadata, "pickaxe", "shovel", "axe"),
-                GTToolHarvestHelper.isAppropriateMaterial(
-                        block,
-                        Material.rock,
-                        Material.iron,
-                        Material.anvil,
-                        Material.ground,
-                        Material.grass,
-                        Material.sand,
-                        Material.snow,
-                        Material.craftedSnow,
-                        Material.clay,
-                        Material.wood,
-                        Material.plants,
-                        Material.vine,
-                        Material.leaves,
-                        Material.gourd),
-                GTToolHarvestHelper.isAppropriateMaterial(
-                        block,
-                        Material.cactus,
-                        Material.glass,
-                        Material.sponge,
-                        Material.cloth,
-                        Material.carpet,
-                        Material.coral,
-                        Material.ice,
-                        Material.packedIce,
-                        Material.circuits,
-                        Material.redstoneLight,
-                        Material.tnt,
-                        Material.cake,
-                        Material.web,
-                        Material.piston,
-                        Material.dragonEgg));
     }
 
     @Override
@@ -169,40 +142,136 @@ public class ItemTieredVajra extends Item implements IElectricItem {
     public boolean onItemUseFirst(ItemStack stack, EntityPlayer player, World world,
                                   int x, int y, int z, int side,
                                   float hitX, float hitY, float hitZ) {
+        if (ForgeEventFactory.onItemUseStart(player, stack, 1) <= 0) {
+            return true;
+        }
+
+        Block targetBlock = world.getBlock(x, y, z);
+        PlayerInteractEvent.Action action = targetBlock == null || targetBlock.isAir(world, x, y, z)
+                ? PlayerInteractEvent.Action.RIGHT_CLICK_AIR
+                : PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK;
+        if (ForgeEventFactory.onPlayerInteract(player, action, x, y, z, side, world).isCanceled()) {
+            return true;
+        }
+
         TileEntity tileEntity = world.getTileEntity(x, y, z);
         Object cable = getGregTechCable(tileEntity);
-        if (cable == null) {
-            return false;
+        if (cable != null) {
+            if (!VajraLogic.shouldConsumeCableInteraction(true, world.isRemote)) {
+                return false;
+            }
+
+            ForgeDirection clickedSide = ForgeDirection.getOrientation(side);
+            ForgeDirection connectionSide = GTUtility.determineWrenchingSide(
+                    clickedSide, hitX, hitY, hitZ);
+            return useWireCutter(cable, clickedSide, connectionSide,
+                    player, hitX, hitY, hitZ, stack);
         }
 
-        if (!VajraLogic.shouldConsumeCableInteraction(true, world.isRemote)) {
-            return false;
+        if (handleAeWrench(stack, player, world, x, y, z, side, hitX, hitY, hitZ)) {
+            return true;
         }
 
-        ForgeDirection clickedSide = ForgeDirection.getOrientation(side);
-        ForgeDirection connectionSide = GTUtility.determineWrenchingSide(
-                clickedSide, hitX, hitY, hitZ);
-        return useWireCutter(cable, clickedSide, connectionSide,
-                player, hitX, hitY, hitZ, stack);
+        // Match AE quartz wrench: rotate any non-AE block that supports rotateBlock.
+        return handleGenericRotate(stack, player, world, x, y, z, side, targetBlock);
     }
 
     @Override
     public boolean doesSneakBypassUse(World world, int x, int y, int z,
                                       EntityPlayer player) {
-        return VajraLogic.shouldBypassSneakUse(
-                isGregTechPipe(world.getTileEntity(x, y, z)));
+        return VajraLogic.shouldBypassSneakUse(true);
     }
 
-    private boolean isGregTechPipe(TileEntity tileEntity) {
-        if (tileEntity == null) {
+    @Override
+    public boolean canWrench(ItemStack stack, EntityPlayer player, int x, int y, int z) {
+        return stack != null && stack.getItem() == this && canUseWrench(stack, player);
+    }
+
+    private boolean handleAeWrench(ItemStack stack, EntityPlayer player, World world,
+                                   int x, int y, int z, int side,
+                                   float hitX, float hitY, float hitZ) {
+        Block block = world.getBlock(x, y, z);
+        if (!(block instanceof AEBaseTileBlock)
+                || !canUseWrench(stack, player)
+                || !Platform.hasPermissions(
+                        new appeng.api.util.DimensionalCoord(world, x, y, z), player)) {
             return false;
         }
 
-        try {
-            return Class.forName("gregtech.api.metatileentity.BaseMetaPipeEntity")
-                    .isInstance(tileEntity);
-        } catch (ClassNotFoundException ignored) {
+        if (!player.isSneaking()) {
+            if (world.isRemote) {
+                return false;
+            }
+            if (!block.rotateBlock(world, x, y, z, ForgeDirection.getOrientation(side))) {
+                return false;
+            }
+            block.onNeighborBlockChange(world, x, y, z, Platform.AIR_BLOCK);
+            player.swingItem();
+            consumeWrenchEnergy(stack, player);
+            return true;
+        }
+
+        TileEntity tileEntity = world.getTileEntity(x, y, z);
+        if (tileEntity instanceof IPartHost) {
+            boolean handled = PartPlacement.place(
+                    stack,
+                    x,
+                    y,
+                    z,
+                    side,
+                    player,
+                    world,
+                    PlaceType.INTERACT_FIRST_PASS,
+                    0);
+            if (handled && !world.isRemote) {
+                consumeWrenchEnergy(stack, player);
+            }
+            if (handled || tileEntity instanceof TileCableBus) {
+                return handled;
+            }
+        }
+
+        // Let the AE block preserve its own dismantle drops and settings NBT.
+        if (world.isRemote) {
             return false;
+        }
+        Block beforeBlock = world.getBlock(x, y, z);
+        TileEntity beforeTile = world.getTileEntity(x, y, z);
+        boolean activated = block.onBlockActivated(
+                world, x, y, z, player, side, hitX, hitY, hitZ);
+        boolean removed = world.getBlock(x, y, z) != beforeBlock
+                || world.getTileEntity(x, y, z) != beforeTile;
+        if (removed) {
+            consumeWrenchEnergy(stack, player);
+            return true;
+        }
+        return activated;
+    }
+
+    private boolean handleGenericRotate(ItemStack stack, EntityPlayer player, World world,
+                                         int x, int y, int z, int side, Block block) {
+        if (player.isSneaking()
+                || block == null
+                || !canUseWrench(stack, player)
+                || !Platform.hasPermissions(
+                        new appeng.api.util.DimensionalCoord(world, x, y, z), player)) {
+            return false;
+        }
+        if (world.isRemote) {
+            return false;
+        }
+        if (!block.rotateBlock(world, x, y, z, ForgeDirection.getOrientation(side))) {
+            return false;
+        }
+        block.onNeighborBlockChange(world, x, y, z, Platform.AIR_BLOCK);
+        player.swingItem();
+        consumeWrenchEnergy(stack, player);
+        return true;
+    }
+
+    private void consumeWrenchEnergy(ItemStack stack, EntityPlayer player) {
+        if (!player.capabilities.isCreativeMode) {
+            ElectricItem.manager.use(stack, tier.getOperationCost(), player);
         }
     }
 

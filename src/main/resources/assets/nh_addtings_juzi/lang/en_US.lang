@@ -1,6 +1,9 @@
 item.flight_charm.name=Flight Charm
+item.flight_charm.tooltip.shift=Hold Shift for details
+item.flight_charm.tooltip.detail1=Grants creative flight while worn
+item.flight_charm.tooltip.detail2=Adds 8.0 exhaustion every 30s of flight (about 1 hunger)
 item.hv_vajra.name=Basic Vajra
-item.hv_vajra.tooltip=Pickaxe, shovel, axe, wrench, and wire cutter in one
+item.hv_vajra.tooltip=Pickaxe, shovel, axe, wrench, wire cutter, and AE wrench in one
 itemGroup.nh_addtings_juzi=NH-AddTings-Juzi
 gt.blockmachines.charging_station.name=Charging Station
 nh_addtings_juzi.charging_station.tooltip=Wireless charging for team members and nearby GregTech machines

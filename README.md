@@ -1,26 +1,26 @@
 # NH-AddTings-Juzi
 
-一个面向 **Minecraft 1.7.10 / GregTech: New Horizons** 的扩展模组，为整合包补充飞行饰品、HV 电动工具与无线供电设备。
+一个面向 **Minecraft 1.7.10 / GregTech: New Horizons** 的扩展模组，为整合包补充飞行饰品、HV 电动工具、无线供电设备与无限制 AE 存储单元。
 
-当前版本：`0.1.6a`
+当前版本：`0.1.7`
 
 ## 功能
 
 ### 飞行符咒
 
 - 装备在 Baubles Expanded 的符咒栏后获得生存模式飞行能力。
-- 飞行期间每 30 秒增加 `8.0` 疲劳度，约等于消耗 1 个鸡腿。
+- 飞行期间每 30 秒增加 `8.0` 疲劳度，约等于 1 点饥饿。
 - 饥饿值低于 4 点时停止提供飞行；恢复进食后可重新启用。
 - 创造模式玩家不会受到飞行权限回收影响。
 - 通过神秘时代奥术工作台合成，需要六种基础要素各 `50` 点。
 
 ### HV 基础金刚杵
 
-- 一件 HV 级 IC2 电动工具，可作为镐、铲和斧使用，并能拆除 GregTech 机器方块。
-- 支持仙人掌、玻璃、海绵、布料、蛛网、冰等常见可破坏材质。
+- 一件 HV 级 IC2 电动工具，可作为镐、铲、斧、GT 扳手/剪线钳使用，并实现 AE2 `IAEWrench`。
+- 电量足够时可破坏任意方块（含 GregTech 机器）；挖掘速度 `30`，每操作消耗 `3,333 EU`。
 - 最大储能 `10,000,000 EU`，充电等级 HV，传输限制 `512 EU/t`。
-- 挖掘速度 `30`，每破坏一个方块消耗 `3,333 EU`。
-- 电量不足一次操作所需能量时无法继续采掘。
+- 对 AE 方块：普通右键旋转，潜行配合部件/拆除逻辑；也可旋转其他支持 `rotateBlock` 的方块。
+- 电量不足一次操作所需能量时无法继续采掘或使用扳手功能。
 - 通过普通有序合成获得，成品会继承配方中 HV 锂电池的电量。
 
 ### 无线充电站
@@ -50,6 +50,14 @@
 - 在充电站界面使用 Shift+左键转移玩家背包物品时，充电站电路槽不会参与转移，避免物品消失。
 - 在组装机中使用 `1× EV 机器外壳`、`2× 精英电路`、`16× HV 发射器`、`8× HV 传感器` 和 `1× LV 力场发生器` 合成；耗时 30 秒，功率 `480 EU/t`。
 
+### 无限制 AE 存储单元
+
+- 提供 1k / 4k / 16k / 64k 物品盘与流体盘，以及共用「无限制外壳」合成组件。
+- 容量按**总量**计费：物品约 `8` 个/byte，流体约 `2048` mB/byte；**不按种类额外扣字节**，种类上限接近无限制。
+- 实际内容存在世界侧 `WorldSavedData`（按物品 NBT 中的 UUID 索引），物品上只保留 UUID 与用量统计。
+- **复制带同一 UUID 的磁盘会共享同一份库存**；拆分/合成空盘时会退回外壳与组件。
+- 流体盘依赖 AE2 Fluid Crafting（ae2fc）的流体盘 API。
+
 ## 运行依赖
 
 本模组面向 GTNH `2.8.4` 环境开发。运行时所需的核心模组包括：
@@ -58,6 +66,8 @@
 - Forge `10.13.4.1614`
 - GregTech 5 Unofficial
 - IndustrialCraft 2 Experimental
+- Applied Energistics 2（GTNH）
+- AE2 Fluid Crafting（ae2fc，流体盘）
 - Baubles Expanded
 - Thaumcraft 4
 - Thaumic Exploration
@@ -99,7 +109,7 @@ Linux / macOS：
 构建产物位于：
 
 ```text
-build/libs/NH-AddTings-Juzi-0.1.6a.jar
+build/libs/NH-AddTings-Juzi-0.1.7.jar
 ```
 
 运行单元测试：
@@ -114,9 +124,11 @@ build/libs/NH-AddTings-Juzi-0.1.6a.jar
 src/main/java/com/juzi/nhaddtingsjuzi/
 ├─ item/       飞行符咒与 HV 基础金刚杵
 ├─ machine/    无线充电站及其供电逻辑
-├─ recipe/     奥术、工作台与组装机配方
+├─ storage/    无限制物品/流体 AE 盘
+├─ recipe/     奥术、工作台、组装机与盘配方
 ├─ registry/   物品、机器和配方注册
 ├─ compat/     玩家电动物品与队伍兼容层
+├─ network/    手持物品充电同步
 └─ client/     客户端事件与 NEI 集成
 ```
 
