@@ -8,25 +8,26 @@ public class UnrestrictedFluidCellStorageLogicTest {
 
     @Test
     public void convertsCapacityBytesToFluidAmount() {
-        assertEquals(2097152L, UnrestrictedFluidCellStorageLogic.capacityForBytes(1024));
-        assertEquals(8388608L, UnrestrictedFluidCellStorageLogic.capacityForBytes(4096));
-        assertEquals(33554432L, UnrestrictedFluidCellStorageLogic.capacityForBytes(16384));
-        assertEquals(134217728L, UnrestrictedFluidCellStorageLogic.capacityForBytes(65536));
+        // 8192 mB per byte
+        assertEquals(8388608L, UnrestrictedFluidCellStorageLogic.capacityForBytes(1024));
+        assertEquals(33554432L, UnrestrictedFluidCellStorageLogic.capacityForBytes(4096));
+        assertEquals(134217728L, UnrestrictedFluidCellStorageLogic.capacityForBytes(16384));
+        assertEquals(536870912L, UnrestrictedFluidCellStorageLogic.capacityForBytes(65536));
     }
 
     @Test
     public void roundsUsedBytesUpLikeTheItemCell() {
         assertEquals(0L, UnrestrictedFluidCellStorageLogic.usedBytes(0));
         assertEquals(1L, UnrestrictedFluidCellStorageLogic.usedBytes(1));
-        assertEquals(1L, UnrestrictedFluidCellStorageLogic.usedBytes(2048));
-        assertEquals(2L, UnrestrictedFluidCellStorageLogic.usedBytes(2049));
+        assertEquals(1L, UnrestrictedFluidCellStorageLogic.usedBytes(8192));
+        assertEquals(2L, UnrestrictedFluidCellStorageLogic.usedBytes(8193));
     }
 
     @Test
     public void computesRemainingFluidFromTheExactAmountLedger() {
-        assertEquals(2097152L, UnrestrictedFluidCellStorageLogic.remainingAmount(1024, 0));
-        assertEquals(2097151L, UnrestrictedFluidCellStorageLogic.remainingAmount(1024, 1));
-        assertEquals(0L, UnrestrictedFluidCellStorageLogic.remainingAmount(1024, 2097152L));
-        assertEquals(0L, UnrestrictedFluidCellStorageLogic.remainingAmount(1024, 2097153L));
+        assertEquals(8388608L, UnrestrictedFluidCellStorageLogic.remainingAmount(1024, 0));
+        assertEquals(8388607L, UnrestrictedFluidCellStorageLogic.remainingAmount(1024, 1));
+        assertEquals(0L, UnrestrictedFluidCellStorageLogic.remainingAmount(1024, 8388608L));
+        assertEquals(0L, UnrestrictedFluidCellStorageLogic.remainingAmount(1024, 8388609L));
     }
 }
