@@ -2,7 +2,7 @@
 
 一个面向 **Minecraft 1.7.10 / GregTech: New Horizons** 的扩展模组，为整合包补充飞行饰品、HV 电动工具、无线供电设备与无限制 AE 存储单元。
 
-当前版本：`0.1.8c`
+当前版本：`0.1.9a`
 
 ## 功能
 
@@ -60,8 +60,8 @@
 
 - 提供 1k / 4k / 16k / 64k 物品盘与流体盘，以及共用「无限制外壳」合成组件。
 - 容量按**总量**计费：物品约 `8` 个/byte，流体约 `8192` mB/byte；**不按种类额外扣字节**，种类上限接近无限制。
-- 实际内容存在世界侧 `WorldSavedData`（按物品 NBT 中的 UUID 索引），物品上只保留 UUID 与用量统计。
-- **复制带同一 UUID 的磁盘会共享同一份库存**；拆分/合成空盘时会退回外壳与组件。
+- 实际内容固定写在主世界全局 `WorldSavedData`（按物品 NBT 中的 UUID 索引，与机器所在维度无关），物品上只保留 UUID 与用量统计。
+- **复制带同一 UUID 的磁盘会共享同一份库存**；拆空盘需 NBT 与全局存储双重确认为空，才会退回外壳与组件。
 - 流体盘依赖 AE2 Fluid Crafting（ae2fc）的流体盘 API。
 
 ## 运行依赖
@@ -116,7 +116,7 @@ Linux / macOS：
 构建产物位于：
 
 ```text
-build/libs/NH-AddTings-Juzi-0.1.8c.jar
+build/libs/NH-AddTings-Juzi-0.1.9a.jar
 ```
 
 运行单元测试：

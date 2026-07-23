@@ -187,6 +187,11 @@ public final class ContainerJuziDualTerminal extends ContainerMonitor {
     @Override
     public boolean useRealItems() { return true; }
 
+    /** Exposed for NEI recipe packets; mirrors AE CRAFT security. */
+    public boolean canCraft() {
+        return hasAccess(SecurityPermissions.CRAFT, false);
+    }
+
     @Override
     public ItemStack[] getViewCells() {
         ItemStack[] cells = new ItemStack[viewCells.length];

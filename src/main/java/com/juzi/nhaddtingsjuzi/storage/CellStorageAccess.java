@@ -2,7 +2,6 @@ package com.juzi.nhaddtingsjuzi.storage;
 
 import appeng.api.storage.ISaveProvider;
 import appeng.api.storage.data.IAEItemStack;
-import appeng.api.storage.data.IItemList;
 import appeng.api.networking.security.BaseActionSource;
 import appeng.api.networking.security.MachineSource;
 import appeng.api.networking.security.IActionHost;
@@ -16,6 +15,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 /** Resolves cell UUIDs and keeps lightweight client-visible statistics on the item. */
@@ -29,8 +29,9 @@ public final class CellStorageAccess {
     private CellStorageAccess() {}
 
     public static CellDataStorage get(ItemStack cell, ISaveProvider provider) {
-        World world = resolveWorld(provider);
-        if (world == null || world.isRemote || cell == null) return null;
+        if (cell == null) return null;
+        World world = globalStorageWorld();
+        if (world == null || world.isRemote) return null;
 
         NBTTagCompound tag = cell.getTagCompound();
         if (tag == null) {
@@ -46,6 +47,7 @@ public final class CellStorageAccess {
         CellStorageManager manager = CellStorageManager.get(world);
         if (manager == null) return null;
         CellDataStorage storage = manager.getOrCreate(uuid);
+        migrateFromProviderWorld(uuid, storage, manager, provider);
         migrateLegacyContents(tag, storage, manager);
         updateStats(tag, storage);
         return storage;
@@ -63,9 +65,14 @@ public final class CellStorageAccess {
             cell.setTagCompound(tag);
         }
         updateStats(tag, storage);
-        World world = resolveWorld(provider, source);
+        World world = globalStorageWorld();
         CellStorageManager manager = CellStorageManager.get(world);
         if (manager != null) manager.markDirty();
+        // provider/source only mark the host dirty for container NBT sync; never select storage world.
+        notifyMachineSave(source);
+        if (provider instanceof TileEntity) {
+            ((TileEntity) provider).markDirty();
+        }
     }
 
     /**
@@ -88,12 +95,72 @@ public final class CellStorageAccess {
         return storage != null && storage.getStoredItemCount() <= 0;
     }
 
+    /**
+     * Fail-closed disassembly gate: NBT stats and global world storage must both confirm empty.
+     * If world storage cannot be resolved, refuse disassembly.
+     */
+    public static boolean canDisassemble(ItemStack cell) {
+        if (cell == null) return false;
+        CellDataStorage storage = get(cell, null);
+        return CellDisassembleLogic.canDisassemble(
+                getStoredItemCount(cell),
+                getUsedBytes(cell),
+                getStoredItemTypes(cell),
+                storage != null,
+                storage == null ? 0L : storage.getStoredItemCount());
+    }
+
     public static long getStoredItemTypes(ItemStack cell) {
         return getStat(cell, USED_TYPES_TAG);
     }
 
     public static long getUsedBytes(ItemStack cell) {
         return getStat(cell, USED_BYTES_TAG);
+    }
+
+    /**
+     * Always use overworld / first available server world mapStorage so cells never
+     * fork content across dimensions based on the host machine location.
+     */
+    static World globalStorageWorld() {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) return null;
+        World world = DimensionManager.getWorld(0);
+        if (world != null) return world;
+        MinecraftServer server = MinecraftServer.getServer();
+        return server == null || server.worldServers == null || server.worldServers.length == 0
+            ? null : server.worldServers[0];
+    }
+
+    /**
+     * One-time pull of pre-0.1.9a content that was written into a non-global dimension mapStorage.
+     */
+    private static void migrateFromProviderWorld(UUID uuid, CellDataStorage global,
+            CellStorageManager globalManager, ISaveProvider provider) {
+        if (global == null || global.getStoredItemCount() > 0 || !(provider instanceof TileEntity)) return;
+        World providerWorld = ((TileEntity) provider).getWorldObj();
+        World storageWorld = globalStorageWorld();
+        if (providerWorld == null || storageWorld == null || providerWorld == storageWorld) return;
+        if (providerWorld.provider != null && storageWorld.provider != null
+                && providerWorld.provider.dimensionId == storageWorld.provider.dimensionId) {
+            return;
+        }
+        CellStorageManager legacyManager = CellStorageManager.get(providerWorld);
+        if (legacyManager == null) return;
+        CellDataStorage legacy = legacyManager.getOrCreate(uuid);
+        if (legacy == null || legacy.getStoredItemCount() <= 0) return;
+        // Snapshot first: extract may dirty/rebuild the live list while iterating.
+        ArrayList<IAEItemStack> snapshot = new ArrayList<IAEItemStack>();
+        for (IAEItemStack stack : legacy.getItems()) {
+            if (stack == null || stack.getStackSize() <= 0) continue;
+            snapshot.add(stack.copy());
+        }
+        for (IAEItemStack stack : snapshot) {
+            global.addImported(stack.copy());
+            // Leave legacy entry empty after copy so reloads do not double-count.
+            legacy.extract(stack, stack.getStackSize());
+        }
+        globalManager.markDirty();
+        legacyManager.markDirty();
     }
 
     private static void migrateLegacyContents(NBTTagCompound tag, CellDataStorage storage, CellStorageManager manager) {
@@ -126,22 +193,5 @@ public final class CellStorageAccess {
         } catch (IllegalArgumentException ignored) {
             return null;
         }
-    }
-
-    private static World resolveWorld(ISaveProvider provider) {
-        return resolveWorld(provider, null);
-    }
-
-    private static World resolveWorld(ISaveProvider provider, BaseActionSource source) {
-        if (provider instanceof TileEntity) return ((TileEntity) provider).getWorldObj();
-        if (source instanceof MachineSource && ((MachineSource) source).via instanceof TileEntity) {
-            return ((TileEntity) ((MachineSource) source).via).getWorldObj();
-        }
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) return null;
-        World world = DimensionManager.getWorld(0);
-        if (world != null) return world;
-        MinecraftServer server = MinecraftServer.getServer();
-        return server == null || server.worldServers == null || server.worldServers.length == 0
-            ? null : server.worldServers[0];
     }
 }

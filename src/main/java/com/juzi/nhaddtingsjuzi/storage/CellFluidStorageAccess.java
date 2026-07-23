@@ -4,15 +4,13 @@ import appeng.api.storage.ISaveProvider;
 import appeng.api.storage.data.IAEFluidStack;
 import appeng.api.networking.security.BaseActionSource;
 import appeng.util.item.AEFluidStack;
-import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
-import net.minecraftforge.common.DimensionManager;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 /** Resolves fluid cell UUIDs and keeps lightweight client-visible statistics on the item. */
@@ -26,8 +24,9 @@ public final class CellFluidStorageAccess {
     private CellFluidStorageAccess() {}
 
     public static CellFluidDataStorage get(ItemStack cell, ISaveProvider provider) {
-        World world = resolveWorld(provider);
-        if (world == null || world.isRemote || cell == null) return null;
+        if (cell == null) return null;
+        World world = globalStorageWorld();
+        if (world == null || world.isRemote) return null;
 
         NBTTagCompound tag = getOrCreateTag(cell);
         UUID uuid = readUuid(tag);
@@ -39,6 +38,7 @@ public final class CellFluidStorageAccess {
         CellStorageManager manager = CellStorageManager.get(world);
         if (manager == null) return null;
         CellFluidDataStorage storage = manager.getOrCreateFluid(uuid);
+        migrateFromProviderWorld(uuid, storage, manager, provider);
         migrateLegacyContents(tag, storage, manager);
         updateStats(tag, storage);
         return storage;
@@ -51,8 +51,13 @@ public final class CellFluidStorageAccess {
     public static void save(ItemStack cell, ISaveProvider provider, CellFluidDataStorage storage, BaseActionSource source) {
         if (cell == null || storage == null) return;
         updateStats(getOrCreateTag(cell), storage);
-        CellStorageManager manager = CellStorageManager.get(resolveWorld(provider, source));
+        CellStorageManager manager = CellStorageManager.get(globalStorageWorld());
         if (manager != null) manager.markDirty();
+        // provider/source only mark the host dirty for container NBT sync; never select storage world.
+        notifyMachineSave(source);
+        if (provider instanceof TileEntity) {
+            ((TileEntity) provider).markDirty();
+        }
     }
 
     public static void notifyMachineSave(BaseActionSource source) {
@@ -74,6 +79,53 @@ public final class CellFluidStorageAccess {
     public static boolean isEmpty(ItemStack cell, ISaveProvider provider) {
         CellFluidDataStorage storage = get(cell, provider);
         return storage != null && storage.getStoredFluidCount() <= 0;
+    }
+
+    /**
+     * Fail-closed disassembly gate: NBT stats and global world storage must both confirm empty.
+     * If world storage cannot be resolved, refuse disassembly.
+     */
+    public static boolean canDisassemble(ItemStack cell) {
+        if (cell == null) return false;
+        CellFluidDataStorage storage = get(cell, null);
+        return CellDisassembleLogic.canDisassemble(
+                getStoredFluidCount(cell),
+                getUsedBytes(cell),
+                getStoredFluidTypes(cell),
+                storage != null,
+                storage == null ? 0L : storage.getStoredFluidCount());
+    }
+
+    static World globalStorageWorld() {
+        return CellStorageAccess.globalStorageWorld();
+    }
+
+    private static void migrateFromProviderWorld(UUID uuid, CellFluidDataStorage global,
+            CellStorageManager globalManager, ISaveProvider provider) {
+        if (global == null || global.getStoredFluidCount() > 0 || !(provider instanceof TileEntity)) return;
+        World providerWorld = ((TileEntity) provider).getWorldObj();
+        World storageWorld = globalStorageWorld();
+        if (providerWorld == null || storageWorld == null || providerWorld == storageWorld) return;
+        if (providerWorld.provider != null && storageWorld.provider != null
+                && providerWorld.provider.dimensionId == storageWorld.provider.dimensionId) {
+            return;
+        }
+        CellStorageManager legacyManager = CellStorageManager.get(providerWorld);
+        if (legacyManager == null) return;
+        CellFluidDataStorage legacy = legacyManager.getOrCreateFluid(uuid);
+        if (legacy == null || legacy.getStoredFluidCount() <= 0) return;
+        // Snapshot first: fluid extract rebuilds the live list and would break a live iterator.
+        ArrayList<IAEFluidStack> snapshot = new ArrayList<IAEFluidStack>();
+        for (IAEFluidStack stack : legacy.getFluids()) {
+            if (stack == null || stack.getStackSize() <= 0) continue;
+            snapshot.add(stack.copy());
+        }
+        for (IAEFluidStack stack : snapshot) {
+            global.addImported(stack.copy());
+            legacy.extract(stack, stack.getStackSize());
+        }
+        globalManager.markDirty();
+        legacyManager.markDirty();
     }
 
     private static void migrateLegacyContents(NBTTagCompound tag, CellFluidDataStorage storage, CellStorageManager manager) {
@@ -115,23 +167,5 @@ public final class CellFluidStorageAccess {
         } catch (IllegalArgumentException ignored) {
             return null;
         }
-    }
-
-    private static World resolveWorld(ISaveProvider provider) {
-        return resolveWorld(provider, null);
-    }
-
-    private static World resolveWorld(ISaveProvider provider, BaseActionSource source) {
-        if (provider instanceof TileEntity) return ((TileEntity) provider).getWorldObj();
-        if (source instanceof appeng.api.networking.security.MachineSource
-            && ((appeng.api.networking.security.MachineSource) source).via instanceof TileEntity) {
-            return ((TileEntity) ((appeng.api.networking.security.MachineSource) source).via).getWorldObj();
-        }
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) return null;
-        World world = DimensionManager.getWorld(0);
-        if (world != null) return world;
-        MinecraftServer server = MinecraftServer.getServer();
-        return server == null || server.worldServers == null || server.worldServers.length == 0
-            ? null : server.worldServers[0];
     }
 }

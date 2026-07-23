@@ -118,7 +118,7 @@ public class UnrestrictedCellItem extends Item implements IStorageCell, CellInve
         if (!player.isSneaking() || world.isRemote) {
             return super.onItemRightClick(stack, world, player);
         }
-        if (!CellStorageAccess.isEmpty(stack, null)) {
+        if (!CellStorageAccess.canDisassemble(stack)) {
             return stack;
         }
 
@@ -141,7 +141,7 @@ public class UnrestrictedCellItem extends Item implements IStorageCell, CellInve
     public boolean onItemUseFirst(ItemStack stack, EntityPlayer player, World world,
         int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
         if (!player.isSneaking() || world.isRemote || player.inventory.getCurrentItem() != stack
-            || !CellStorageAccess.isEmpty(stack, null)) {
+            || !CellStorageAccess.canDisassemble(stack)) {
             return false;
         }
 

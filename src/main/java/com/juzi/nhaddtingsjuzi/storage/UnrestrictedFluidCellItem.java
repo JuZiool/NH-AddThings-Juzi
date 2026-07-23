@@ -89,7 +89,7 @@ public class UnrestrictedFluidCellItem extends Item implements IStorageFluidCell
         if (!player.isSneaking() || world.isRemote) {
             return super.onItemRightClick(stack, world, player);
         }
-        if (!CellFluidStorageAccess.isEmpty(stack, null)) {
+        if (!CellFluidStorageAccess.canDisassemble(stack)) {
             return stack;
         }
 
@@ -112,7 +112,7 @@ public class UnrestrictedFluidCellItem extends Item implements IStorageFluidCell
     public boolean onItemUseFirst(ItemStack stack, EntityPlayer player, World world,
         int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
         if (!player.isSneaking() || world.isRemote || player.inventory.getCurrentItem() != stack
-            || !CellFluidStorageAccess.isEmpty(stack, null)) {
+            || !CellFluidStorageAccess.canDisassemble(stack)) {
             return false;
         }
 

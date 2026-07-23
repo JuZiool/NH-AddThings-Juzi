@@ -31,23 +31,34 @@ import net.minecraftforge.common.util.ForgeDirection;
 public final class DualTerminalRecipeHandler
         implements IMessageHandler<DualTerminalRecipeMessage, IMessage> {
 
+    /** Cap alternatives per craft slot to keep malicious/malformed NEI payloads small. */
+    static final int MAX_ALTERNATIVES_PER_SLOT = 16;
+
     @Override
     public IMessage onMessage(DualTerminalRecipeMessage message, MessageContext context) {
         EntityPlayerMP player = context.getServerHandler().playerEntity;
-        if (!(player.openContainer instanceof ContainerJuziDualTerminal)) return null;
+        if (player == null || !(player.openContainer instanceof ContainerJuziDualTerminal)) {
+            return null;
+        }
+
+        ContainerJuziDualTerminal container = (ContainerJuziDualTerminal) player.openContainer;
+        // CRAFT is the same permission AE requires to open a crafting terminal.
+        if (!container.canCraft()) {
+            return null;
+        }
 
         ItemStack[][] recipe = unpackRecipe(message.getIngredients());
-        fillCraftingGrid(player, (ContainerJuziDualTerminal) player.openContainer, recipe);
+        fillCraftingGrid(player, container, recipe);
         return null;
     }
 
-    private static ItemStack[][] unpackRecipe(NBTTagCompound tag) {
+    static ItemStack[][] unpackRecipe(NBTTagCompound tag) {
         ItemStack[][] recipe = new ItemStack[9][];
         if (tag == null) return recipe;
 
         for (int slot = 0; slot < recipe.length; slot++) {
             NBTTagList alternatives = tag.getTagList("#" + slot, 10);
-            int count = Math.min(alternatives.tagCount(), 256);
+            int count = Math.min(alternatives.tagCount(), MAX_ALTERNATIVES_PER_SLOT);
             if (count == 0) continue;
 
             ItemStack[] stacks = new ItemStack[count];
