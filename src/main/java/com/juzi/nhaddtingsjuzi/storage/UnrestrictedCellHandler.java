@@ -95,13 +95,13 @@ public class UnrestrictedCellHandler implements ICellHandler {
             return ((UnrestrictedItemCellInventory) inventory).getIdleDrain();
         }
         if (inventory instanceof UnrestrictedFluidCellInventory) {
-            return ((UnrestrictedFluidCellInventory) inventory).getIdleDrain(stack);
+            return ((UnrestrictedFluidCellInventory) inventory).getIdleDrain();
         }
         if (inventory instanceof UnrestrictedItemCellHandler) {
             return ((UnrestrictedItemCellHandler) inventory).inventory().getIdleDrain();
         }
         if (inventory instanceof UnrestrictedFluidCellHandler) {
-            return ((UnrestrictedFluidCellHandler) inventory).inventory().getIdleDrain(stack);
+            return ((UnrestrictedFluidCellHandler) inventory).inventory().getIdleDrain();
         }
         return 1.0D;
     }

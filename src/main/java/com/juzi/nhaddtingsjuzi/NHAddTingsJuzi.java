@@ -28,7 +28,7 @@ import cpw.mods.fml.relauncher.SideOnly;
         name = NHAddTingsJuzi.NAME,
         version = NHAddTingsJuzi.VERSION,
         dependencies = "required-after:gregtech;required-after:IC2;"
-                + "required-after:appliedenergistics2;required-after:ae2fc;required-after:ae2thing")
+                + "required-after:appliedenergistics2;required-after:ae2fc")
 public class NHAddTingsJuzi
 {
     @Mod.Instance(NHAddTingsJuzi.MODID)

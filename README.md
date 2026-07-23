@@ -1,8 +1,22 @@
 # NH-AddTings-Juzi
 
-一个面向 **Minecraft 1.7.10 / GregTech: New Horizons** 的扩展模组，为整合包补充飞行饰品、HV 电动工具、无线供电设备与无限制 AE 存储单元。
+一个面向 **Minecraft 1.7.10 / GregTech: New Horizons** 的扩展模组，为整合包补充飞行饰品、HV 电动工具、无线供电设备、混合终端与无限制 AE 存储单元。
 
 当前版本：`0.1.9a`
+
+## 目标环境（本分支）
+
+> **本分支 `adapt/2.9.0-beta1` 面向 GTNH `2.9.0-beta-1`（及同线 2.9 构建）。**  
+> 请只安装在 **2.9 原整合包** 中；**不要** 与 GTNH `2.8.x` 混用。
+
+| 项 | 说明 |
+| --- | --- |
+| 目标整合包 | GTNH `2.9.0-beta-1` |
+| 安装方式 | 原整合包 `mods/` + 本模组 **单个 jar** |
+| 额外第三方 jar | **不需要**（尤其不需要 `AE2Things` / `ae2thing`） |
+| 2.8.x | 请使用面向 2.8 的旧发布版 / `master` 线产物，勿用本分支 jar |
+
+实机验证：在 GTNH 2.9.0-beta-1 原包环境下，飞行符咒、HV 金刚杵、无线充电站、混合终端与无限制盘均可正常使用。
 
 ## 功能
 
@@ -52,9 +66,9 @@
 
 ### 混合终端
 
-- 复用 AE2Things 合成终端 UI，保留搜索、排序、3x3 合成区与 NEI 交互。
-- AE 物品与 AE2FC 流体进入同一列表，共同参与当前名称、数量、MOD 及正/倒序排序。
-- 物品使用 AE2 原生存取操作；流体使用 AE2Things 的流体容器操作逻辑。
+- 基于 AE2 原生合成终端（`GuiCraftingTerm` / `ContainerCraftingTerm`），保留 3x3 合成区与 NEI 配方填充。
+- **不再硬依赖 AE2Things**；GTNH 2.9 原整合包单 jar 即可使用。
+- 物品/流体走 2.9 AE2 本体通道（native fluid / stack type）。
 
 ### 无限制 AE 存储单元
 
@@ -66,29 +80,33 @@
 
 ## 运行依赖
 
-本模组面向 GTNH `2.8.4` 环境开发。运行时所需的核心模组包括：
+本模组面向 **GTNH `2.9.0-beta-1` 原整合包** 开发与验证。  
+只要装的是完整 2.9 包，下列模组已自带，**无需再额外下载**：
 
 - Minecraft `1.7.10`
 - Forge `10.13.4.1614`
-- GregTech 5 Unofficial
+- GregTech 5 Unofficial（2.9 线）
 - IndustrialCraft 2 Experimental
-- Applied Energistics 2（GTNH）
-- AE2 Fluid Crafting（ae2fc，流体盘）
-- AE2Things（ae2thing，混合终端 UI 与流体交互）
+- Applied Energistics 2（GTNH，2.9 线）
+- AE2 Fluid Crafting（ae2fc，2.9 线）
 - Baubles Expanded
 - Thaumcraft 4
 - Thaumic Exploration
-- ModularUI 2
+- ModularUI / ModularUI 2
 - ServerUtilities（无线充电站队伍识别）
 
-建议直接在对应版本的 GTNH 客户端或服务端中使用，不建议将其视为通用 Forge 独立模组安装。
+硬依赖（`@Mod`）仅为：`gregtech`、`IC2`、`appliedenergistics2`、`ae2fc`。  
+**不依赖 `ae2thing`。**
+
+建议只在对应版本的 GTNH 客户端/服务端中使用，不建议当作通用 Forge 独立模组安装。
 
 ## 安装
 
-1. 从 [Releases](https://github.com/JuZiool/NH-AddThings-Juzi/releases) 下载与当前版本对应的 JAR。
-2. 将 JAR 放入 GTNH 实例的 `mods/` 目录。
-3. 客户端和服务端均需安装相同版本。
-4. 完整重启游戏或服务端。
+1. 确认实例为 **GTNH 2.9.0-beta-1**（或同线 2.9 构建），不是 2.8.x。
+2. 从 [Releases](https://github.com/JuZiool/NH-AddThings-Juzi/releases) 下载 **标注 2.9** 的 JAR，或使用本分支构建产物。
+3. 将 JAR 放入该实例的 `mods/` 目录（例如 `versions/GT New Horizons 2.9.0-beta-1/mods/`）。
+4. 客户端和服务端均需安装相同版本；**不要**再额外装 AE2Things。
+5. 完整重启游戏或服务端。
 
 ## 从源码构建
 

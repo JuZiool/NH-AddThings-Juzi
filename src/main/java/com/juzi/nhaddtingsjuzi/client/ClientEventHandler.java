@@ -4,6 +4,7 @@ import com.juzi.nhaddtingsjuzi.NHAddTingsJuzi;
 import com.juzi.nhaddtingsjuzi.item.ItemFlightCharm;
 import com.juzi.nhaddtingsjuzi.item.ItemTieredVajra;
 import com.juzi.nhaddtingsjuzi.item.VajraLogic;
+import com.juzi.nhaddtingsjuzi.machine.MTEChargingStation;
 import com.juzi.nhaddtingsjuzi.registry.ModItems;
 
 import gregtech.api.util.GTUtility;
@@ -29,6 +30,9 @@ public final class ClientEventHandler {
 
     @SubscribeEvent
     public void onTextureStitch(TextureStitchEvent.Pre event) {
+        if (event.map.getTextureType() == 0) {
+            MTEChargingStation.FRONT_OVERLAY.register(event.map);
+        }
         if (event.map.getTextureType() == 1) {
             ItemFlightCharm.icon = event.map.registerIcon(
                     NHAddTingsJuzi.MODID + ":" + ModItems.FLIGHT_CHARM_ID);

@@ -5,7 +5,7 @@ import java.lang.reflect.Constructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.asdflj.ae2thing.client.gui.container.ContainerJuziDualTerminal;
+import com.juzi.nhaddtingsjuzi.terminal.container.ContainerJuziDualTerminal;
 import com.juzi.nhaddtingsjuzi.terminal.parts.PartDualTerminal;
 
 import appeng.api.parts.IPartHost;

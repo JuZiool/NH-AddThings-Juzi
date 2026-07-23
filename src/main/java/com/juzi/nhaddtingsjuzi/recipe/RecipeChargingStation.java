@@ -22,7 +22,7 @@ public final class RecipeChargingStation {
                                 ChargingStationRecipeSpec.EV_HULLS)),
                         require("IV circuit", GTOreDictUnificator.get(
                                 OrePrefixes.circuit,
-                                Materials.Elite,
+                                Materials.IV,
                                 ChargingStationRecipeSpec.IV_CIRCUITS)),
                         require("HV emitter", ItemList.Emitter_HV.get(
                                 ChargingStationRecipeSpec.HV_EMITTERS)),

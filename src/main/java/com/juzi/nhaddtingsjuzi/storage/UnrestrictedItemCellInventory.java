@@ -7,14 +7,16 @@ import appeng.api.storage.IMEInventory;
 import appeng.api.storage.ISaveProvider;
 import appeng.api.storage.StorageChannel;
 import appeng.api.storage.data.IAEItemStack;
+import appeng.api.storage.data.IAEStackType;
 import appeng.api.storage.data.IItemList;
 import appeng.api.exceptions.AppEngException;
 import appeng.util.item.AEItemStack;
+import appeng.util.item.AEItemStackType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 
-public class UnrestrictedItemCellInventory implements IMEInventory<IAEItemStack>, appeng.api.storage.ICellInventory {
+public class UnrestrictedItemCellInventory implements IMEInventory<IAEItemStack>, appeng.api.storage.ICellInventory<IAEItemStack> {
     private static final String CONTENTS = "NHContents";
     private final ItemStack cell;
     private final ISaveProvider provider;
@@ -84,6 +86,7 @@ public class UnrestrictedItemCellInventory implements IMEInventory<IAEItemStack>
     @Override public IItemList<IAEItemStack> getAvailableItems(IItemList<IAEItemStack> out) { return storage() == null ? out : storage().addAvailableItems(out); }
     @Override public IAEItemStack getAvailableItem(IAEItemStack request) { return storage() == null ? null : storage().getAvailableItem(request); }
     @Override public StorageChannel getChannel() { return StorageChannel.ITEMS; }
+    @Override public IAEStackType<?> getStackType() { return AEItemStackType.ITEM_STACK_TYPE; }
     @Override public ItemStack getItemStack() { return cell; }
     @Override public double getIdleDrain() { return type.getIdleDrain(); }
     @Override public FuzzyMode getFuzzyMode() { return type.getFuzzyMode(cell); }

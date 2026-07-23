@@ -24,7 +24,9 @@ import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
+import com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil;
 import gregtech.api.enums.Textures;
+import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.modularui.IAddUIWidgets;
@@ -32,7 +34,6 @@ import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.metatileentity.implementations.MTEBasicHull;
 import gregtech.api.render.TextureFactory;
-import gregtech.api.util.GTUtility;
 import ic2.api.item.ElectricItem;
 import ic2.api.item.IElectricItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -50,9 +51,8 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
 
     private static final int CIRCUIT_SLOT = 0;
     private static final int MAX_CIRCUITS = 16;
-    private static final Textures.BlockIcons.CustomIcon FRONT_OVERLAY =
-            new Textures.BlockIcons.CustomIcon(
-                    "nh_addtings_juzi:machine/overlay_charging_station");
+    public static final ChargingStationIcon FRONT_OVERLAY =
+            new ChargingStationIcon("nh_addtings_juzi:machine/overlay_charging_station");
 
     private final ServerUtilitiesTeamResolver teamResolver = new ServerUtilitiesTeamResolver();
     private final List<TargetPosition> targets = new ArrayList<TargetPosition>();
@@ -67,8 +67,8 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
     private ChargingStationUiState clientUiState = ChargingStationUiState.empty();
 
     public MTEChargingStation(int id, String name, String regionalName, int machineTier) {
-        super(id, name, regionalName, machineTier,
-                ChargingStationUiSpec.description());
+        // GT 5.09.52 MTEBasicHull no longer takes description varargs here.
+        super(id, name, regionalName, machineTier);
     }
 
     private MTEChargingStation(String name, int tier, int slots,
@@ -146,7 +146,7 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
                                  int colorIndex,
                                  boolean active,
                                  boolean redstone) {
-        Textures.BlockIcons casingIcon;
+        IIconContainer casingIcon;
         if (side == ForgeDirection.UP) {
             casingIcon = Textures.BlockIcons.MACHINE_EV_TOP;
         } else if (side == ForgeDirection.DOWN) {
@@ -164,8 +164,7 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
         return front;
     }
 
-    @Override
-    public int func_70297_j_() {
+    public int getInventoryStackLimit() {
         return ChargingStationLogic.circuitSlotLimit();
     }
 
@@ -285,7 +284,7 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
                 }, new Function<Long, String>() {
                     @Override
                     public String apply(Long value) {
-                        return GTUtility.formatNumbers(value);
+                        return NumberFormatUtil.formatNumber(value);
                     }
                 }));
     }
@@ -316,7 +315,7 @@ public class MTEChargingStation extends MTEBasicHull implements IAddUIWidgets {
         }, new Function<Long, String>() {
             @Override
             public String apply(Long value) {
-                return GTUtility.formatNumbers(value);
+                return NumberFormatUtil.formatNumber(value);
             }
         });
     }

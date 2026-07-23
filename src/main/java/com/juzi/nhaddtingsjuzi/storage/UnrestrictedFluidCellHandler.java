@@ -5,12 +5,12 @@ import appeng.api.config.IncludeExclude;
 import appeng.api.config.Upgrades;
 import appeng.api.implementations.items.IUpgradeModule;
 import appeng.api.storage.ICellCacheRegistry;
-import appeng.api.storage.IMEInventory;
 import appeng.api.storage.StorageChannel;
 import appeng.api.storage.data.IAEFluidStack;
 import appeng.api.storage.data.IItemList;
 import appeng.me.storage.MEInventoryHandler;
 import appeng.util.item.AEFluidStack;
+import appeng.util.item.AEFluidStackType;
 import appeng.util.prioitylist.PrecisePriorityList;
 import com.glodblock.github.common.item.ItemFluidPacket;
 import com.glodblock.github.util.Util;
@@ -19,14 +19,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 
 /**
- * Mirrors ae2fc {@code FluidCellInventoryHandler}: Cell Workbench config becomes a
- * precise fluid partition list; inverter/sticky upgrades are honored.
+ * Fluid cell handler for 2.9: MEInventoryHandler now takes IAEStackType.
  */
 public class UnrestrictedFluidCellHandler extends MEInventoryHandler<IAEFluidStack> implements ICellCacheRegistry {
     private final UnrestrictedFluidCellInventory cellInventory;
 
     public UnrestrictedFluidCellHandler(UnrestrictedFluidCellInventory inventory) {
-        super(inventory, StorageChannel.FLUIDS);
+        super(inventory, AEFluidStackType.FLUID_STACK_TYPE);
         this.cellInventory = inventory;
         applyPartition(inventory);
     }
@@ -44,7 +43,6 @@ public class UnrestrictedFluidCellHandler extends MEInventoryHandler<IAEFluidSta
                     aeFluid.setStackSize(1);
                     priorityList.add(aeFluid);
                 }
-                // Normalize config display to fluid packets when player drops a filled container.
                 if (is != null && !(is.getItem() instanceof ItemFluidPacket)) {
                     config.setInventorySlotContents(x, ItemFluidPacket.newDisplayStack(fluid));
                     config.markDirty();
@@ -128,5 +126,10 @@ public class UnrestrictedFluidCellHandler extends MEInventoryHandler<IAEFluidSta
     @Override
     public TYPE getCellType() {
         return TYPE.FLUID;
+    }
+
+    @Override
+    public StorageChannel getStorageChannel() {
+        return StorageChannel.FLUIDS;
     }
 }

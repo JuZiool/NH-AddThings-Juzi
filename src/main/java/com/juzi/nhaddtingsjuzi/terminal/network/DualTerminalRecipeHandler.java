@@ -1,6 +1,6 @@
 package com.juzi.nhaddtingsjuzi.terminal.network;
 
-import com.asdflj.ae2thing.client.gui.container.ContainerJuziDualTerminal;
+import com.juzi.nhaddtingsjuzi.terminal.container.ContainerJuziDualTerminal;
 
 import appeng.api.config.Actionable;
 import appeng.api.config.FuzzyMode;
@@ -100,7 +100,7 @@ public final class DualTerminalRecipeHandler
         ItemStack expectedOutput = recipe.getCraftingResult(recipeMatrix);
         if (expectedOutput == null) return;
 
-        IMEMonitor<IAEItemStack> monitor = container.getMonitor();
+        IMEMonitor<IAEItemStack> monitor = container.getItemMonitor();
         IEnergySource power = container.getPowerSource();
         IItemList<IAEItemStack> storage = monitor == null ? null : monitor.getStorageList();
         IPartitionList<IAEItemStack> filter = ItemViewCell.createFilter(container.getViewCells());

@@ -9,6 +9,7 @@ import appeng.api.storage.ICellCacheRegistry;
 import appeng.api.storage.IMEInventory;
 import appeng.api.storage.StorageChannel;
 import appeng.api.storage.data.IAEItemStack;
+import appeng.util.item.AEItemStackType;
 import appeng.api.storage.data.IItemList;
 import appeng.me.storage.MEInventoryHandler;
 import appeng.util.item.AEItemStack;
@@ -26,7 +27,7 @@ public class UnrestrictedItemCellHandler extends MEInventoryHandler<IAEItemStack
     private final UnrestrictedItemCellInventory cellInventory;
 
     public UnrestrictedItemCellHandler(UnrestrictedItemCellInventory inventory) {
-        super(inventory, StorageChannel.ITEMS);
+        super(inventory, AEItemStackType.ITEM_STACK_TYPE);
         this.cellInventory = inventory;
         applyPartition(inventory);
     }
@@ -145,5 +146,10 @@ public class UnrestrictedItemCellHandler extends MEInventoryHandler<IAEItemStack
     @Override
     public TYPE getCellType() {
         return TYPE.ITEM;
+    }
+
+    @Override
+    public StorageChannel getStorageChannel() {
+        return StorageChannel.ITEMS;
     }
 }

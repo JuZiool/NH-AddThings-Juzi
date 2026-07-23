@@ -4,11 +4,14 @@ import java.util.List;
 
 import appeng.api.config.FuzzyMode;
 import appeng.api.exceptions.AppEngException;
+import appeng.api.implementations.items.IStorageCell;
 import appeng.api.storage.IMEInventoryHandler;
 import appeng.api.storage.ISaveProvider;
 import appeng.api.storage.StorageChannel;
 import appeng.api.storage.data.IAEFluidStack;
-import com.glodblock.github.common.storage.IStorageFluidCell;
+import appeng.api.storage.data.IAEStack;
+import appeng.api.storage.data.IAEStackType;
+import appeng.util.item.AEFluidStackType;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -21,7 +24,11 @@ import net.minecraft.world.World;
 
 import com.juzi.nhaddtingsjuzi.NHAddTingsJuzi;
 
-public class UnrestrictedFluidCellItem extends Item implements IStorageFluidCell, CellInventoryProvider {
+/**
+ * Fluid cell item for 2.9 Stack Type API.
+ * Implements AE2 {@link IStorageCell} with fluid stack type instead of removed ae2fc IStorageFluidCell.
+ */
+public class UnrestrictedFluidCellItem extends Item implements IStorageCell, CellInventoryProvider {
     private final int capacity;
     private final String id;
 
@@ -34,20 +41,82 @@ public class UnrestrictedFluidCellItem extends Item implements IStorageFluidCell
         setCreativeTab(NHAddTingsJuzi.TAB_NH_ADD_TINGS);
     }
 
-    public void register() { GameRegistry.registerItem(this, id); }
-    public int getCapacity() { return capacity; }
-    @Override public long getBytes(ItemStack cellItem) { return capacity; }
-    @Override public int getBytesPerType(ItemStack cellItem) { return 0; }
-    @Override public boolean isBlackListed(ItemStack cellItem, IAEFluidStack fluid) {
-        return fluid == null || fluid.getFluid() == null;
+    public void register() {
+        GameRegistry.registerItem(this, id);
     }
-    @Override public boolean storableInStorageCell() { return false; }
-    @Override public boolean isStorageCell(ItemStack i) { return false; }
-    @Override public double getIdleDrain(ItemStack is) { return 1.0D; }
-    @Override public int getTotalTypes(ItemStack cellItem) { return Integer.MAX_VALUE; }
-    @Override public boolean isEditable(ItemStack is) { return true; }
 
-    /** ae2fc fluid cells use inverter + sticky; no fuzzy/ore-filter for fluids. */
+    public int getCapacity() {
+        return capacity;
+    }
+
+    @Override
+    public int getBytes(ItemStack cellItem) {
+        return capacity;
+    }
+
+    @Override
+    public long getBytesLong(ItemStack cellItem) {
+        return capacity;
+    }
+
+    @Override
+    public int BytePerType(ItemStack cellItem) {
+        return 0;
+    }
+
+    @Override
+    public int getBytesPerType(ItemStack cellItem) {
+        return 0;
+    }
+
+    @Override
+    public int getTotalTypes(ItemStack cellItem) {
+        return Integer.MAX_VALUE;
+    }
+
+    @Override
+    public boolean isBlackListed(ItemStack cellItem, appeng.api.storage.data.IAEItemStack requestedAddition) {
+        return true;
+    }
+
+    @Override
+    public boolean isBlackListed(IAEStack<?> stack) {
+        if (!(stack instanceof IAEFluidStack)) {
+            return true;
+        }
+        IAEFluidStack fluid = (IAEFluidStack) stack;
+        return fluid.getFluid() == null;
+    }
+
+    public boolean isBlackListed(ItemStack cellItem, IAEFluidStack fluid) {
+        return isBlackListed(fluid);
+    }
+
+    @Override
+    public boolean storableInStorageCell() {
+        return false;
+    }
+
+    @Override
+    public boolean isStorageCell(ItemStack i) {
+        return false;
+    }
+
+    @Override
+    public double getIdleDrain() {
+        return 1.0D;
+    }
+
+    @Override
+    public double getIdleDrain(ItemStack is) {
+        return getIdleDrain();
+    }
+
+    @Override
+    public boolean isEditable(ItemStack is) {
+        return true;
+    }
+
     @Override
     public IInventory getUpgradesInventory(ItemStack is) {
         return new appeng.items.contents.CellUpgrades(is, 2);
@@ -55,6 +124,16 @@ public class UnrestrictedFluidCellItem extends Item implements IStorageFluidCell
 
     @Override
     public IInventory getConfigInventory(ItemStack is) {
+        // Default interface method wraps AE inventory; provide legacy IInventory via CellConfigLegacy path
+        // by using the interface default through a temporary CellConfig for fluid type is not IInventory.
+        // Use CellConfig + Legacy wrapper via AE stack inventory.
+        return new appeng.items.contents.CellConfigLegacy(
+                new appeng.items.contents.CellConfig(is),
+                AEFluidStackType.FLUID_STACK_TYPE);
+    }
+
+    @Override
+    public appeng.tile.inventory.IAEStackInventory getConfigAEInventory(ItemStack is) {
         return new appeng.items.contents.CellConfig(is);
     }
 
@@ -73,15 +152,24 @@ public class UnrestrictedFluidCellItem extends Item implements IStorageFluidCell
         appeng.util.Platform.openNbtData(is).setString("FuzzyMode", mode.name());
     }
 
+    @Override
+    public IAEStackType<?> getStackType() {
+        return AEFluidStackType.FLUID_STACK_TYPE;
+    }
+
     public IMEInventoryHandler<IAEFluidStack> getInventoryHandler(ItemStack is, ISaveProvider provider, EntityPlayer player)
-        throws AppEngException {
+            throws AppEngException {
         return new UnrestrictedFluidCellHandler(new UnrestrictedFluidCellInventory(is, provider, this));
     }
 
     @Override
     public IMEInventoryHandler<?> getCellInventory(ItemStack is, ISaveProvider provider, EntityPlayer player)
-        throws AppEngException {
+            throws AppEngException {
         return getInventoryHandler(is, provider, player);
+    }
+
+    public StorageChannel getChannel() {
+        return StorageChannel.FLUIDS;
     }
 
     @Override
@@ -93,8 +181,6 @@ public class UnrestrictedFluidCellItem extends Item implements IStorageFluidCell
             return stack;
         }
 
-        // Keep the current cell in its slot while inserting the two outputs. Forge may
-        // write the returned stack back to that slot after this method returns.
         giveOrDrop(player, new ItemStack(com.juzi.nhaddtingsjuzi.registry.ModItems.unrestrictedShell));
         giveOrDrop(player, UnrestrictedFluidCellComponents.forCapacity(capacity));
         if (stack.stackSize <= 1) {
@@ -103,16 +189,14 @@ public class UnrestrictedFluidCellItem extends Item implements IStorageFluidCell
         } else {
             stack.stackSize--;
         }
-        // Forge 1.7.10 reads stackSize from the returned stack without a null check.
         return stack;
     }
 
-    /** Matches AE2's block-right-click disassembly path, which returns a boolean. */
     @Override
     public boolean onItemUseFirst(ItemStack stack, EntityPlayer player, World world,
-        int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
+            int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
         if (!player.isSneaking() || world.isRemote || player.inventory.getCurrentItem() != stack
-            || !CellFluidStorageAccess.canDisassemble(stack)) {
+                || !CellFluidStorageAccess.canDisassemble(stack)) {
             return false;
         }
 

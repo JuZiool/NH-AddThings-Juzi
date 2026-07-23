@@ -40,19 +40,21 @@ minecraft {
 // 解决中文注释的编码问题
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 dependencies {
     testCompile 'junit:junit:4.13.2'
-    compile 'com.github.GTNewHorizons:ModularUI:1.2.20'
+    // ModularUI and all GTNH deps are provided via ./libs jars for 2.9.0-beta-1.
 
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..
     //compile "some.group:artifact:version:classifier"
     //compile "some.group:artifact:version"
-    
+
     // BaublesExpanded - 饰品栏 API
     compile fileTree(dir: 'libs', include: '*.jar')
-      
+
     // real examples
     //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
     //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env

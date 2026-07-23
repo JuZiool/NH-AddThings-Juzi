@@ -9,6 +9,8 @@ import appeng.api.storage.IMEInventoryHandler;
 import appeng.api.storage.ISaveProvider;
 import appeng.api.storage.StorageChannel;
 import appeng.api.storage.data.IAEItemStack;
+import appeng.api.storage.data.IAEStackType;
+import appeng.util.item.AEItemStackType;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -78,7 +80,19 @@ public class UnrestrictedCellItem extends Item implements IStorageCell, CellInve
 
     @Override
     public IInventory getConfigInventory(ItemStack is) {
+        return new appeng.items.contents.CellConfigLegacy(
+                new appeng.items.contents.CellConfig(is),
+                AEItemStackType.ITEM_STACK_TYPE);
+    }
+
+    @Override
+    public appeng.tile.inventory.IAEStackInventory getConfigAEInventory(ItemStack is) {
         return new appeng.items.contents.CellConfig(is);
+    }
+
+    @Override
+    public IAEStackType<?> getStackType() {
+        return AEItemStackType.ITEM_STACK_TYPE;
     }
 
     @Override

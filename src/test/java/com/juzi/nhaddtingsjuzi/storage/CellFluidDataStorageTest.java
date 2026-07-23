@@ -7,7 +7,10 @@ import static org.junit.Assert.assertNull;
 import appeng.api.config.Actionable;
 import appeng.api.config.FuzzyMode;
 import appeng.api.storage.data.IAEFluidStack;
+import appeng.api.storage.data.IAEStackType;
 import appeng.api.storage.data.IItemList;
+import appeng.util.item.AEFluidStackType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraft.nbt.NBTTagCompound;
@@ -168,6 +171,7 @@ public class CellFluidDataStorageTest {
         @Override public void resetStatus() { }
         @Override public boolean hasWriteAccess() { return true; }
         @Override public IAEFluidStack[] toArray(IAEFluidStack[] array) { return stacks.toArray(array); }
+        @Override public IAEStackType<IAEFluidStack> getStackType() { return AEFluidStackType.FLUID_STACK_TYPE; }
     }
 
     private static final class TestFluidStack implements IAEFluidStack {
@@ -215,5 +219,18 @@ public class CellFluidDataStorageTest {
         @Override public IAEFluidStack setUsedPercent(float percent) { return this; }
         @Override public long getCountRequestableCrafts() { return 0; }
         @Override public IAEFluidStack setCountRequestableCrafts(long count) { return this; }
+        @Override public boolean isSameType(IAEFluidStack other) { return equals(other); }
+        @Override public boolean isSameType(Object other) { return equals(other); }
+        @Override public String getUnlocalizedName() { return fluid.getName(); }
+        @Override public String getDisplayName() { return fluid.getName(); }
+        @Override public String getModId() { return "test"; }
+        @Override public void setTagCompound(NBTTagCompound tag) { }
+        @Override public boolean hasTagCompound() { return false; }
+        @Override public ItemStack getItemStackForNEI() { return null; }
+        @Override public void drawInGui(Minecraft mc, int x, int y) { }
+        @Override public void drawOverlayInGui(Minecraft mc, int x, int y, boolean a, boolean b, boolean c, boolean d) { }
+        @Override public void drawOnBlockFace(net.minecraft.world.World world) { }
+        @Override public IAEStackType<IAEFluidStack> getStackType() { return AEFluidStackType.FLUID_STACK_TYPE; }
+        @Override public int getAmountPerUnit() { return 1; }
     }
 }

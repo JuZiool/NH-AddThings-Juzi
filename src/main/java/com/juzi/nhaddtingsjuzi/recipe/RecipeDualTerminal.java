@@ -1,6 +1,5 @@
 package com.juzi.nhaddtingsjuzi.recipe;
 
-import com.glodblock.github.loader.ItemAndBlockHolder;
 import com.juzi.nhaddtingsjuzi.registry.ModItems;
 
 import appeng.api.AEApi;
@@ -16,6 +15,7 @@ public final class RecipeDualTerminal {
     private RecipeDualTerminal() {}
 
     public static void register() {
+        // 2.9 AE2 native fluid stack type: craft from crafting terminal + storage terminal + processors.
         GTRecipeBuilder.builder()
                 .itemInputs(
                         require("AE2 crafting terminal", AEApi.instance()
@@ -24,9 +24,12 @@ public final class RecipeDualTerminal {
                                 .craftingTerminal()
                                 .maybeStack(1)
                                 .orNull()),
-                        require("AE2FC fluid terminal", ItemAndBlockHolder.FLUID_TERM == null
-                                ? null
-                                : ItemAndBlockHolder.FLUID_TERM.stack()),
+                        require("AE2 terminal", AEApi.instance()
+                                .definitions()
+                                .parts()
+                                .terminal()
+                                .maybeStack(1)
+                                .orNull()),
                         require("AE2 logic processors", AEApi.instance()
                                 .definitions()
                                 .materials()
