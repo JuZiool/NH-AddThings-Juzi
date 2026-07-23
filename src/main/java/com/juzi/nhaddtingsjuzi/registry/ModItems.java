@@ -28,10 +28,18 @@ public final class ModItems {
     public static UnrestrictedCellItem itemCell4k;
     public static UnrestrictedCellItem itemCell16k;
     public static UnrestrictedCellItem itemCell64k;
+    public static UnrestrictedCellItem itemCell256k;
+    public static UnrestrictedCellItem itemCell1024k;
+    public static UnrestrictedCellItem itemCell4096k;
+    public static UnrestrictedCellItem itemCell16384k;
     public static UnrestrictedFluidCellItem fluidCell1k;
     public static UnrestrictedFluidCellItem fluidCell4k;
     public static UnrestrictedFluidCellItem fluidCell16k;
     public static UnrestrictedFluidCellItem fluidCell64k;
+    public static UnrestrictedFluidCellItem fluidCell256k;
+    public static UnrestrictedFluidCellItem fluidCell1024k;
+    public static UnrestrictedFluidCellItem fluidCell4096k;
+    public static UnrestrictedFluidCellItem fluidCell16384k;
     public static ItemPartDualTerminal dualTerminal;
 
     private ModItems() {}
@@ -51,10 +59,18 @@ public final class ModItems {
         itemCell4k = UnrestrictedCellItem.create("unrestricted_item_cell_4k", 4096);
         itemCell16k = UnrestrictedCellItem.create("unrestricted_item_cell_16k", 16384);
         itemCell64k = UnrestrictedCellItem.create("unrestricted_item_cell_64k", 65536);
+        itemCell256k = UnrestrictedCellItem.create("unrestricted_item_cell_256k", 262144);
+        itemCell1024k = UnrestrictedCellItem.create("unrestricted_item_cell_1024k", 1048576);
+        itemCell4096k = UnrestrictedCellItem.create("unrestricted_item_cell_4096k", 4194304);
+        itemCell16384k = UnrestrictedCellItem.create("unrestricted_item_cell_16384k", 16777216);
         fluidCell1k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_1k", 1024);
         fluidCell4k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_4k", 4096);
         fluidCell16k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_16k", 16384);
         fluidCell64k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_64k", 65536);
+        fluidCell256k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_256k", 262144);
+        fluidCell1024k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_1024k", 1048576);
+        fluidCell4096k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_4096k", 4194304);
+        fluidCell16384k = UnrestrictedFluidCellItem.create("unrestricted_fluid_cell_16384k", 16777216);
         dualTerminal = new ItemPartDualTerminal().register();
         AEApi.instance().registries().cell().addCellHandler(new UnrestrictedCellHandler());
     }

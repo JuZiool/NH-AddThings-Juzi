@@ -6,9 +6,17 @@ import com.juzi.nhaddtingsjuzi.item.ItemTieredVajra;
 import com.juzi.nhaddtingsjuzi.item.VajraLogic;
 import com.juzi.nhaddtingsjuzi.machine.MTEChargingStation;
 import com.juzi.nhaddtingsjuzi.registry.ModItems;
+import com.juzi.nhaddtingsjuzi.network.ModNetwork;
+import com.juzi.nhaddtingsjuzi.terminal.parts.PartDualTerminal;
+
+import appeng.client.gui.implementations.GuiCraftingStatus;
+import appeng.client.gui.widgets.GuiTabButton;
+import appeng.container.implementations.ContainerCraftingStatus;
 
 import gregtech.api.util.GTUtility;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
@@ -38,6 +46,23 @@ public final class ClientEventHandler {
                     NHAddTingsJuzi.MODID + ":" + ModItems.FLIGHT_CHARM_ID);
             ItemTieredVajra.icon = event.map.registerIcon(
                     NHAddTingsJuzi.MODID + ":" + ModItems.HV_VAJRA_ID);
+        }
+    }
+
+    @SubscribeEvent
+    public void onGuiAction(GuiScreenEvent.ActionPerformedEvent.Pre event) {
+        if (!(event.gui instanceof GuiCraftingStatus)
+                || !(event.button instanceof GuiTabButton)) {
+            return;
+        }
+
+        GuiContainer gui = (GuiContainer) event.gui;
+        if (gui.inventorySlots instanceof ContainerCraftingStatus
+                && gui.inventorySlots instanceof appeng.container.AEBaseContainer
+                && ((appeng.container.AEBaseContainer) gui.inventorySlots).getTarget()
+                        instanceof PartDualTerminal) {
+            event.setCanceled(true);
+            ModNetwork.sendDualTerminalReturnRequest();
         }
     }
 

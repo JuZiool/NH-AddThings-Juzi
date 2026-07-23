@@ -20,6 +20,14 @@ public final class UnrestrictedFluidCellComponents {
                 return CellType.Cell16kPart.getDamageValue();
             case 65536:
                 return CellType.Cell64kPart.getDamageValue();
+            case 262144:
+                return CellType.Cell256kPart.getDamageValue();
+            case 1048576:
+                return CellType.Cell1024kPart.getDamageValue();
+            case 4194304:
+                return CellType.Cell4096kPart.getDamageValue();
+            case 16777216:
+                return CellType.Cell16384kPart.getDamageValue();
             default:
                 throw new IllegalArgumentException("Unsupported unrestricted fluid cell capacity: " + capacity);
         }

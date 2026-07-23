@@ -1,0 +1,4 @@
+﻿{
+  "parent": "minecraft:item/generated",
+  "textures": { "layer0": "nh_addtings_juzi:item/unrestricted_item_cell_1024k" }
+}
