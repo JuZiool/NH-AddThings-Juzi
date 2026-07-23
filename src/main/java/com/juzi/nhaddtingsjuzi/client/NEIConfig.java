@@ -7,14 +7,25 @@ import com.juzi.nhaddtingsjuzi.terminal.client.GuiJuziDualTerminal;
 
 import codechicken.nei.api.API;
 import codechicken.nei.api.IConfigureNEI;
+import codechicken.nei.api.INEIGuiAdapter;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;
 
 public class NEIConfig implements IConfigureNEI {
+
+    private static final INEIGuiAdapter DUAL_TERMINAL_GUI_HANDLER = new INEIGuiAdapter() {
+        @Override
+        public boolean hideItemPanelSlot(GuiContainer gui, int x, int y, int width, int height) {
+            return gui instanceof GuiJuziDualTerminal
+                    && ((GuiJuziDualTerminal) gui).hideItemPanelSlot(x, y, width, height);
+        }
+    };
 
     @Override
     public void loadConfig() {
         ItemStack chargingStationStack = ModMachines.chargingStationStack.copy();
         API.addItemVariant(chargingStationStack.getItem(), chargingStationStack);
+        API.registerNEIGuiHandler(DUAL_TERMINAL_GUI_HANDLER);
         API.registerGuiOverlayHandler(
                 GuiJuziDualTerminal.class,
                 DualTerminalCraftingTransferHandler.INSTANCE,

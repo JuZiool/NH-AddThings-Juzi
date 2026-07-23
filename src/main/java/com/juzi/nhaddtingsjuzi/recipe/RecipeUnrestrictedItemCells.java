@@ -17,6 +17,10 @@ public final class RecipeUnrestrictedItemCells {
         addRecipe(ModItems.itemCell4k, UnrestrictedCellComponents.forCapacity(4096));
         addRecipe(ModItems.itemCell16k, UnrestrictedCellComponents.forCapacity(16384));
         addRecipe(ModItems.itemCell64k, UnrestrictedCellComponents.forCapacity(65536));
+        addRecipe(ModItems.itemCell256k, UnrestrictedCellComponents.forCapacity(262144));
+        addRecipe(ModItems.itemCell1024k, UnrestrictedCellComponents.forCapacity(1048576));
+        addRecipe(ModItems.itemCell4096k, UnrestrictedCellComponents.forCapacity(4194304));
+        addRecipe(ModItems.itemCell16384k, UnrestrictedCellComponents.forCapacity(16777216));
     }
 
     private static void addRecipe(UnrestrictedCellItem outputItem, ItemStack component) {

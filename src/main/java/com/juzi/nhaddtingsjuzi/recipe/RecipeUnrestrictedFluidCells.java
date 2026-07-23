@@ -17,6 +17,10 @@ public final class RecipeUnrestrictedFluidCells {
         addRecipeIfAvailable(ModItems.fluidCell4k, UnrestrictedFluidCellComponents.forCapacity(4096));
         addRecipeIfAvailable(ModItems.fluidCell16k, UnrestrictedFluidCellComponents.forCapacity(16384));
         addRecipeIfAvailable(ModItems.fluidCell64k, UnrestrictedFluidCellComponents.forCapacity(65536));
+        addRecipeIfAvailable(ModItems.fluidCell256k, UnrestrictedFluidCellComponents.forCapacity(262144));
+        addRecipeIfAvailable(ModItems.fluidCell1024k, UnrestrictedFluidCellComponents.forCapacity(1048576));
+        addRecipeIfAvailable(ModItems.fluidCell4096k, UnrestrictedFluidCellComponents.forCapacity(4194304));
+        addRecipeIfAvailable(ModItems.fluidCell16384k, UnrestrictedFluidCellComponents.forCapacity(16777216));
     }
 
     private static void addRecipeIfAvailable(UnrestrictedFluidCellItem outputItem, ItemStack component) {

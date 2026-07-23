@@ -5,9 +5,22 @@ import com.juzi.nhaddtingsjuzi.item.ItemFlightCharm;
 import com.juzi.nhaddtingsjuzi.item.ItemTieredVajra;
 import com.juzi.nhaddtingsjuzi.item.VajraLogic;
 import com.juzi.nhaddtingsjuzi.registry.ModItems;
+import com.juzi.nhaddtingsjuzi.network.ModNetwork;
+import com.juzi.nhaddtingsjuzi.terminal.parts.PartDualTerminal;
+
+import com.asdflj.ae2thing.client.gui.GuiCraftAmount;
+import appeng.client.gui.implementations.GuiCraftingStatus;
+import appeng.client.gui.widgets.GuiTabButton;
+import appeng.container.implementations.ContainerCraftAmount;
+import appeng.container.implementations.ContainerCraftingStatus;
+import appeng.core.localization.GuiText;
 
 import gregtech.api.util.GTUtility;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
@@ -17,6 +30,7 @@ import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import org.lwjgl.input.Keyboard;
 
 @SideOnly(Side.CLIENT)
 public final class ClientEventHandler {
@@ -35,6 +49,47 @@ public final class ClientEventHandler {
             ItemTieredVajra.icon = event.map.registerIcon(
                     NHAddTingsJuzi.MODID + ":" + ModItems.HV_VAJRA_ID);
         }
+    }
+
+    @SubscribeEvent
+    public void onGuiAction(GuiScreenEvent.ActionPerformedEvent.Pre event) {
+        if (event.gui instanceof GuiCraftAmount
+                && isCraftAmountSubmit(event.button)) {
+            GuiContainer gui = (GuiContainer) event.gui;
+            if (gui.inventorySlots instanceof ContainerCraftAmount) {
+                ContainerCraftAmount container = (ContainerCraftAmount) gui.inventorySlots;
+                if (container.getTarget() instanceof PartDualTerminal) {
+                    int amount = ((GuiCraftAmount) event.gui).getAmount();
+                    if (amount > 0) {
+                        event.setCanceled(true);
+                        ModNetwork.sendDualTerminalCraftRequest(amount, isShiftDown());
+                        return;
+                    }
+                }
+            }
+        }
+
+        if (event.gui instanceof GuiCraftingStatus
+                && event.button instanceof GuiTabButton) {
+            GuiContainer gui = (GuiContainer) event.gui;
+            if (gui.inventorySlots instanceof ContainerCraftingStatus
+                    && gui.inventorySlots instanceof appeng.container.AEBaseContainer
+                    && ((appeng.container.AEBaseContainer) gui.inventorySlots).getTarget()
+                            instanceof PartDualTerminal) {
+                event.setCanceled(true);
+                ModNetwork.sendDualTerminalReturnRequest();
+            }
+        }
+    }
+
+    private static boolean isCraftAmountSubmit(GuiButton button) {
+        if (button == null || button.displayString == null) return false;
+        String label = button.displayString.trim();
+        return GuiText.Next.getLocal().equals(label) || GuiText.Start.getLocal().equals(label);
+    }
+
+    private static boolean isShiftDown() {
+        return Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
     }
 
     @SubscribeEvent

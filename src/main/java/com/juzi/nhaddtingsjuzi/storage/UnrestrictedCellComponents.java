@@ -18,6 +18,14 @@ public final class UnrestrictedCellComponents {
                 return require("16k", AEApi.instance().definitions().materials().cell16kPart().maybeStack(1).orNull());
             case 65536:
                 return require("64k", AEApi.instance().definitions().materials().cell64kPart().maybeStack(1).orNull());
+            case 262144:
+                return require("256k", AEApi.instance().definitions().materials().cell256kPart().maybeStack(1).orNull());
+            case 1048576:
+                return require("1024k", AEApi.instance().definitions().materials().cell1024kPart().maybeStack(1).orNull());
+            case 4194304:
+                return require("4096k", AEApi.instance().definitions().materials().cell4096kPart().maybeStack(1).orNull());
+            case 16777216:
+                return require("16384k", AEApi.instance().definitions().materials().cell16384kPart().maybeStack(1).orNull());
             default:
                 throw new IllegalArgumentException("Unsupported unrestricted item cell capacity: " + capacity);
         }

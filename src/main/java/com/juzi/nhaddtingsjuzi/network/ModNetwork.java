@@ -5,6 +5,10 @@ import java.util.List;
 import com.juzi.nhaddtingsjuzi.NHAddTingsJuzi;
 import com.juzi.nhaddtingsjuzi.terminal.network.DualTerminalRecipeHandler;
 import com.juzi.nhaddtingsjuzi.terminal.network.DualTerminalRecipeMessage;
+import com.juzi.nhaddtingsjuzi.network.DualTerminalCraftRequestHandler;
+import com.juzi.nhaddtingsjuzi.network.DualTerminalCraftRequestMessage;
+import com.juzi.nhaddtingsjuzi.network.DualTerminalReturnHandler;
+import com.juzi.nhaddtingsjuzi.network.DualTerminalReturnMessage;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -35,6 +39,10 @@ public final class ModNetwork {
                 HeldItemChargeMessage.class, 0, Side.SERVER);
         CHANNEL.registerMessage(DualTerminalRecipeHandler.class,
                 DualTerminalRecipeMessage.class, 1, Side.SERVER);
+        CHANNEL.registerMessage(DualTerminalCraftRequestHandler.class,
+                DualTerminalCraftRequestMessage.class, 2, Side.SERVER);
+        CHANNEL.registerMessage(DualTerminalReturnHandler.class,
+                DualTerminalReturnMessage.class, 3, Side.SERVER);
         registered = true;
     }
 
@@ -51,6 +59,16 @@ public final class ModNetwork {
     @SideOnly(Side.CLIENT)
     public static void sendDualTerminalRecipe(NBTTagCompound ingredients) {
         CHANNEL.sendToServer(new DualTerminalRecipeMessage(ingredients));
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static void sendDualTerminalCraftRequest(int amount, boolean heldShift) {
+        CHANNEL.sendToServer(new DualTerminalCraftRequestMessage(amount, heldShift));
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static void sendDualTerminalReturnRequest() {
+        CHANNEL.sendToServer(new DualTerminalReturnMessage());
     }
 
     public static void syncHeldItem(EntityPlayerMP player, int inventorySlot,

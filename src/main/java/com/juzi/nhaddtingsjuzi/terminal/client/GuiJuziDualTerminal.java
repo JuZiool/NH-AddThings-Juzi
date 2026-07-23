@@ -59,6 +59,10 @@ public final class GuiJuziDualTerminal extends GuiCraftingTerminal {
     public void drawBG(int offsetX, int offsetY, int mouseX, int mouseY) {
         applyViewCells();
         super.drawBG(offsetX, offsetY, mouseX, mouseY);
+
+        // AE2's crafting texture has a separate right-hand extension for view cells.
+        bindTextureBack(getBackground());
+        drawTexturedModalRect(offsetX + 195, offsetY, 195, 0, 46, 128);
     }
 
     private void applyViewCells() {
@@ -67,6 +71,21 @@ public final class GuiJuziDualTerminal extends GuiCraftingTerminal {
         if (Arrays.equals(currentViewCells, cells)) return;
         currentViewCells = cells == null ? new ItemStack[5] : cells.clone();
         repo.setViewCell(currentViewCells);
+    }
+
+    /** Keep NEI item-panel entries clear of the five view-cell slots beside the GUI. */
+    public boolean hideItemPanelSlot(int x, int y, int width, int height) {
+        if (!viewCell || width <= 0 || height <= 0) return false;
+
+        int panelLeft = guiLeft + xSize;
+        int panelTop = guiTop;
+        int panelRight = panelLeft + 33;
+        int panelBottom = panelTop + 14 + currentViewCells.length * 18;
+
+        return x < panelRight
+                && x + width > panelLeft
+                && y < panelBottom
+                && y + height > panelTop;
     }
 
     @Override
